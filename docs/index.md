@@ -1,22 +1,22 @@
-# 🏗️🏗️ RHEL Image Mode Demo use cases 🏗️🏗️
+# RHEL イメージモード デモ ユースケース集
 
-Welcome to this demo content for Red Hat Enterprise Linux Image mode!
-This content provides a quick way to know more and try out the Image Mode for RHEL, with many use cases that can be easily reproduced in your environment.
+Red Hat Enterprise Linux イメージモード のデモコンテンツへようこそ！
+このコンテンツは、RHEL のイメージモード について学び、お使いの環境で簡単に再現できる多くのユースケースを提供します。
 
-Below you can find some external resources from Red Hat websites and upstream projects on the topic.
+以下に、Red Hat のウェブサイトやアップストリームプロジェクトからの関連リソースをまとめています。
 
-[:rocket: Get Started!](getting-started/introduction.md){ .md-button  .md-button--primary}
+[:rocket: はじめる！](getting-started/introduction.md){ .md-button  .md-button--primary}
 
-## RHEL Image mode
+## RHEL イメージモードについて
 
-- [RHEL Image Mode landing page on Red Hat Website](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux/image-mode)
-- [RHEL Image Mode quickstart on Red Hat Blog](https://www.redhat.com/en/blog/image-mode-red-hat-enterprise-linux-quick-start-guide)
-- [RHEL Image Mode documentation on Red Hat Website](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_image_mode_for_rhel_to_build_deploy_and_manage_operating_systems/index)
-- [Red Hat Developers - Getting Started with RHEL Image Mode](https://developers.redhat.com/products/rhel-image-mode/overview)
-- [A new state of mind with image mode for RHEL on Red Hat Blog](https://www.redhat.com/en/blog/new-state-mind-image-mode-rhel)
+- [Red Hat ウェブサイトの RHEL イメージモード ランディングページ](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux/image-mode)
+- [Red Hat ブログの RHEL イメージモード クイックスタート](https://www.redhat.com/en/blog/image-mode-red-hat-enterprise-linux-quick-start-guide)
+- [Red Hat ウェブサイトの RHEL イメージモード ドキュメント](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_image_mode_for_rhel_to_build_deploy_and_manage_operating_systems/index)
+- [Red Hat Developers - RHEL イメージモード 入門](https://developers.redhat.com/products/rhel-image-mode/overview)
+- [Red Hat ブログ - RHEL イメージモードで新しい考え方へ](https://www.redhat.com/en/blog/new-state-mind-image-mode-rhel)
 
-## bootc Upstream projects
+## bootc アップストリームプロジェクト
 
-- [bootc project on GitHub](https://github.com/containers/bootc)
-- [bootc-image-builder project on GitHub](https://github.com/osbuild/bootc-image-builder)
+- [GitHub の bootc プロジェクト](https://github.com/containers/bootc)
+- [GitHub の bootc-image-builder プロジェクト](https://github.com/osbuild/bootc-image-builder)
 

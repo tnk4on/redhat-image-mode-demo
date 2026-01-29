@@ -1,14 +1,14 @@
-# Introducing RHEL Image mode
+# RHEL イメージモードの紹介
 
-## What is RHEL Image Mode?
+## RHEL イメージモードとは？
 
-RHEL Image mode is a new approach for operating system deployment that enables users to create, deploy and manage Red Hat Enterprise Linux as a bootc container image.
+RHEL イメージモードは、ユーザーが Red Hat Enterprise Linux を bootc コンテナイメージとして作成、デプロイ、管理できるようにする、オペレーティングシステムデプロイの新しいアプローチです。
 
-This approach simplifies operations across the enterprise, allowing developers, operations teams and solution providers to use the same container-native tools and techniques to manage everything from applications to the underlying OS.
+このアプローチにより、エンタープライズ全体での運用が簡素化され、開発者、運用チーム、ソリューションプロバイダーは、アプリケーションから基盤となる OS まで、すべてを同じコンテナネイティブなツールと手法で管理できるようになります。
 
-## How is RHEL Image Mode different?
+## RHEL イメージモードの違いは何ですか？
 
-Due to the container-oriented nature, RHEL Image mode opens up to a unification and standardization of OS management and deployment, allowing the integration with existing CI/CD workflows and/or GitOps, reducing complexity.
+コンテナ指向の性質により、RHEL イメージモードは OS 管理とデプロイの統一と標準化を実現し、既存の CI/CD ワークフローや GitOps との統合を可能にし、複雑さを軽減します。
 
-RHEL Image mode also helps increasing security as the content, updates and patches are predictable and atomic, preventing manual modification of core services, packages and applications for a guaranteed consistency at scale.
+RHEL イメージモードはまた、コンテンツ、アップデート、パッチが予測可能でアトミック（原子的）であるため、セキュリティの向上にも役立ちます。コアサービス、パッケージ、アプリケーションの手動変更を防ぎ、大規模環境での一貫性を保証します。
 

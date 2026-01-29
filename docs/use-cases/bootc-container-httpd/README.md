@@ -1,69 +1,69 @@
-# Use Case - Running a bootc container providing Apache HTTP server
+# ユースケース - Apache HTTP サーバーを提供する bootc コンテナの実行
 
-In this example, we will build a container image from a Containerfile and we will then use it as a source for a VM.
+この例では、Containerfile からコンテナイメージをビルドし、VM のソースとして使用します。
 
-The Containerfile in the example:
+この例の Containerfile では：
 
-- Updates packages
-- Installs tmux and mkpasswd to create a simple user password
-- Creates a *bootc-user* user in the image
-- Adds the wheel group to sudoers
-- Installs [Apache Server](https://httpd.apache.org/)
-- Enables the systemd unit for httpd
-- Adds a custom index.html
+- パッケージを更新
+- シンプルなユーザーパスワードを作成するために tmux と mkpasswd をインストール
+- イメージ内に *bootc-user* ユーザーを作成
+- wheel グループを sudoers に追加
+- [Apache Server](https://httpd.apache.org/) をインストール
+- httpd の systemd ユニットを有効化
+- カスタム index.html を追加
 
 <details>
-  <summary>Review Containerfile.httpd</summary>
+  <summary>Containerfile.httpd を確認</summary>
   ```dockerfile
   --8<-- "use-cases/bootc-container-httpd/Containerfile.httpd"
   ```
 </details>
 
-## Building the image
+## イメージのビルド
 
-From the root folder of the repository, switch to the use case directory:
+リポジトリのルートフォルダから、ユースケースディレクトリに移動します：
 
 ```bash
 cd use-cases/bootc-container-httpd
 ```
 
-To build the image:
+イメージをビルドするには：
 
 ```bash
 podman build -f Containerfile.httpd -t rhel-bootc-httpd .
 ```
 
-## Testing the image
+## イメージのテスト
 
-You can now test it using:
+以下のコマンドでテストできます：
 
 ```bash
 podman run -it --name rhel-bootc-httpd --hostname rhel-bootc-httpd -p 8080:80 rhel-bootc-httpd
 ```
 
-Note: The *"-p 8080:80"* part forwards the container's *http* port to the port 8080 on the host to test that it is working.
+注意: *"-p 8080:80"* の部分は、コンテナの *http* ポートをホストの 8080 ポートに転送して、動作をテストします。
 
-The container will now start and a login prompt will appear.
+コンテナが起動し、ログインプロンプトが表示されます。
 
-On another terminal tab or in your browser, you can verify that the httpd server is working and serving traffic.
+別のターミナルタブまたはブラウザで、httpd サーバーが動作してトラフィックを処理していることを確認できます。
 
-**Terminal**
+**ターミナル**
 
 ```bash
  ~ ▓▒░ curl localhost:8080
 ```
 
-**Browser**
+**ブラウザ**
 
 ![](./assets/browser-test.png)
 
-## Exploring the container
+## コンテナの探索
 
-If you are curious, you can easily log-in to the container using the prompt coming from the execution and the **bootc-user/redhat** user and password.
+興味がある場合は、実行から表示されるプロンプトと **bootc-user/redhat** ユーザーとパスワードを使用してコンテナに簡単にログインできます。
 
-From here, you can verify that:
+ここから、以下を確認できます：
 
-- The user has sudo privileges
+- ユーザーには sudo 権限があります
 
 ```bash
 [bootc-user@rhel-bootc-bootc ~]$ sudo su
@@ -71,7 +71,7 @@ bash-5.1# whoami
 root
 ```
 
-- There's systemd running
+- systemd が実行されています
 
 ```bash
 bash-5.1# systemctl status | more
@@ -83,7 +83,7 @@ bash-5.1# systemctl status | more
     Since: Fri 2024-07-19 08:19:28 UTC; 1min 57s ago
 ```
 
-- Apache is loaded as a systemd unit
+- Apache は systemd ユニットとしてロードされています
 
 ```bash
 bash-5.1# systemctl status httpd

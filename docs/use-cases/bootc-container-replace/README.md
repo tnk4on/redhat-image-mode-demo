@@ -1,85 +1,85 @@
-# Use Case - Applying a different RHEL container image to an existing VM
+# ユースケース - 既存の VM に別の RHEL コンテナイメージを適用
 
-Our team is looking to improve performances and test different configurations.
-We created our new and shiny image with Apache HTTPD and MariaDB, but you are exploring alternatives and want to use [Nginx](https://www.nginx.com/) and [PostgreSQL](https://www.postgresql.org/) as some of your team members are more familiar with that stack.
+私たちのチームはパフォーマンスを改善し、異なる設定をテストしようとしています。
+Apache HTTPD と MariaDB で新しい光るイメージを作成しましたが、チームメンバーの一部がそのスタックに精通しているため、[Nginx](https://www.nginx.com/) と [PostgreSQL](https://www.postgresql.org/) を使用する代替案を探求しています。
 
-We will then create an alternative image, with a dedicated tag, that will help our fellow colleagues in their efforts.
-Instead of redeploying the VM from scratch, we are going to use **bootc** to change the reference of the image in our existing VM to use it for configuring the system!
+そこで、専用のタグを持つ代替イメージを作成し、同僚の作業を支援します。
+VM をゼロから再デプロイする代わりに、**bootc** を使用して既存の VM のイメージ参照を変更し、システムの設定に使用します！
 
-The Containerfile.replace is similar to the one in the [Image Upgrade use case](../bootc-container-upgrade/README.md):
+Containerfile.replace は [イメージアップグレードのユースケース](../bootc-container-upgrade/README.md)のものと似ています：
 
-- Updates packages
-- Installs tmux and mkpasswd to create a simple user password
-- Creates a *bootc-user* user in the image
-- Adds the wheel group to sudoers
-- Installs nginx server
-- Enables the systemd unit for nginx
-- Adds a custom index.html
-- Customizes the Message of the day
-- Add an additional message of the day with the new release notes
-- Add postgresql-server package and vim
-- Enable the postgresql-server systemd unit
+- パッケージを更新
+- シンプルなユーザーパスワードを作成するために tmux と mkpasswd をインストール
+- イメージ内に *bootc-user* ユーザーを作成
+- wheel グループを sudoers に追加
+- nginx サーバーをインストール
+- nginx の systemd ユニットを有効化
+- カスタム index.html を追加
+- Message of the Day をカスタマイズ
+- 新しいリリースノートを含む追加の Message of the Day を追加
+- postgresql-server パッケージと vim を追加
+- postgresql-server の systemd ユニットを有効化
 
-Since the *bootc switch* command will preserve the /var and /etc content, we will use a workaround to create the needed dirs for Nginx and Postgresql leveraging [systemd-tmpfiles]({{ config.repo_url }}{{ config.edit_uri }}/use-cases/bootc-container-replace/files/tmpfiles.d/) and [systemd-sysusers]({{ config.repo_url }}{{ config.edit_uri }}/use-cases/bootc-container-replace/files/sysusers.d/) to ensure users are in place.
+*bootc switch* コマンドは /var と /etc のコンテンツを保持するため、[systemd-tmpfiles]({{ config.repo_url }}{{ config.edit_uri }}/use-cases/bootc-container-replace/files/tmpfiles.d/) と [systemd-sysusers]({{ config.repo_url }}{{ config.edit_uri }}/use-cases/bootc-container-replace/files/sysusers.d/) を活用して Nginx と Postgresql に必要なディレクトリを作成し、ユーザーが適切に配置されるようにします。
 
 <details>
-  <summary>Review Containerfile.replace</summary>
+  <summary>Containerfile.replace を確認</summary>
   ```dockerfile
   --8<-- "use-cases/bootc-container-replace/Containerfile.replace"
   ```
 </details>
 
-## Building the image
+## イメージのビルド
 
-From the root folder of the repository, switch to the use case directory:
+リポジトリのルートフォルダから、ユースケースディレクトリに移動します：
 
 ```bash
 cd use-cases/bootc-container-replace
 ```
 
-You can build the image right from the Containerfile using Podman:
+Podman を使用して Containerfile から直接イメージをビルドできます：
 
 ```bash
 podman build -f Containerfile.replace -t rhel-bootc-vm:nginx .
 ```
 
-## Testing the image
+## イメージのテスト
 
-You can now test it using:
+以下のコマンドでテストできます：
 
 ```bash
 podman run -it --name rhel-bootc-vm-nginx --hostname rhel-bootc-vm-nginx -p 8080:80 -p 5432:5432 rhel-bootc-vm:nginx
 ```
 
-Note: The *"-p 8080:80" -p 5432:5432* part forwards the container's *http* and *postgresql* port to the port 8080 and 3306 on the host to test that nginx and postgresql are working.
+注意: *"-p 8080:80" -p 5432:5432* の部分は、コンテナの *http* と *postgresql* ポートをホストの 8080 と 3306 ポートに転送して、nginx と postgresql が動作していることをテストします。
 
-The container will now start and a login prompt will appear.
+コンテナが起動し、ログインプロンプトが表示されます。
 
-### Testing Nginx
+### Nginx のテスト
 
-On another terminal tab or in your browser, you can verify that the httpd server is working and serving traffic.
+別のターミナルタブまたはブラウザで、httpd サーバーが動作してトラフィックを処理していることを確認できます。
 
-**Terminal**
+**ターミナル**
 
 ```bash
  ~ ▓▒░ curl localhost:8080                                                                                                           ░▒▓ ✔  11:59:44
 Welcome to the bootc-nginx instance!
 ```
 
-**Browser**
+**ブラウザ**
 
 ![](./assets/browser-test.png)
 
-### Testing Postgresql
+### Postgresql のテスト
 
-From the login prompt, login as **bootc-user/redhat** and impersonate the root user:
+ログインプロンプトから、**bootc-user/redhat** でログインし、root ユーザーになります：
 
 ```bash
 [bootc-user@rhel-bootc-vm-nginx ~]$ sudo -i
 [root@rhel-bootc-vm-nginx ~]#
 ```
 
-Initialize PostgreSQL db and config:
+PostgreSQL db と設定を初期化：
 
 ```bash
 [root@rhel-bootc-vm-nginx ~]# postgresql-setup --initdb
@@ -87,7 +87,7 @@ Initialize PostgreSQL db and config:
  * Initialized, logs are in /var/lib/pgsql/initdb_postgresql.log
 ```
 
-You will now be able to restart the postgresql systemd unit and test the connection:
+これで postgresql の systemd ユニットを再起動して接続をテストできます：
 
 ```bash
 [root@rhel-bootc-vm-nginx ~]# systemctl restart postgresql
@@ -99,9 +99,9 @@ Type "help" for help.
 postgres=#
 ```
 
-## Tagging and pushing the image
+## イメージのタグ付けとプッシュ
 
-To tag and push the image you can simply run (replace **YOURQUAYUSERNAME** with the account name):
+イメージをタグ付けしてプッシュするには、次のコマンドを実行します（**YOURQUAYUSERNAME** をアカウント名に置き換えてください）：
 
 
 ```bash
@@ -112,26 +112,26 @@ export QUAY_USER=YOURQUAYUSERNAME
 podman tag rhel-bootc-vm:nginx quay.io/$QUAY_USER/rhel-bootc-vm:nginx
 ```
 
-Log-in to Quay.io:
+Quay.io にログイン：
 
 ```bash
 podman login -u $QUAY_USER quay.io
 ```
 
-And push the image:
+そしてイメージをプッシュ：
 
 ```bash
 podman push quay.io/$QUAY_USER/rhel-bootc-vm:nginx
 ```
 
-You can now browse to [https://quay.io/repository/YOURQUAYUSERNAME/rhel-bootc-httpd?tab=settings](https://quay.io/repository/YOURQUAYUSERNAME/rhel-bootc-httpd?tab=settings) and ensure that the repository is set to **"Public"**.
+[https://quay.io/repository/YOURQUAYUSERNAME/rhel-bootc-httpd?tab=settings](https://quay.io/repository/YOURQUAYUSERNAME/rhel-bootc-httpd?tab=settings) にアクセスして、リポジトリが **"Public"** に設定されていることを確認してください。
 
 ![](./assets/quay-repo-public.png)
 
 
-## Updating the VM with the newly created image
+## 新しく作成したイメージで VM を更新
 
-The first thing to do is logging in the VM updated in the [previous use case](../bootc-container-upgrade/README.md):
+最初に行うことは、[前のユースケース](../bootc-container-upgrade/README.md)で更新した VM にログインすることです：
 
 ```bash
  ~ ▓▒░ ssh bootc-user@192.168.124.16
@@ -142,7 +142,7 @@ Last login: Mon Jul 29 12:12:51 2024 from 192.168.124.1
 [bootc-user@localhost ~]$
 ```
 
-Verify that bootc is installed:
+bootc がインストールされていることを確認：
 
 ```bash
 [bootc-user@localhost ~]$ bootc --help
@@ -167,12 +167,12 @@ Options:
   -h, --help   Print help (see a summary with '-h')
 ```
 
-Note that among the options we have the **switch** option that we will be using in this use case.
-The switch option allows checking, fetching and using a different container image to replace the current configuration and spin up a new rpm-ostree image for the system.
+オプションの中に **switch** オプションがあり、このユースケースで使用します。
+switch オプションは、異なるコンテナイメージをチェック、フェッチ、使用して現在の設定を置き換え、システム用の新しい rpm-ostree イメージをスピンアップできます。
 
-In our case we will switch from **rhel-bootc-vm:httpd** to **rhel-bootc-vm:nginx** image.
+この場合、**rhel-bootc-vm:httpd** から **rhel-bootc-vm:nginx** イメージに切り替えます。
 
-The switch command requires higher privileges to run, let's perform the change!
+switch コマンドにはより高い権限が必要です。変更を実行しましょう！
 
 ```bash
 [bootc-user@localhost ~]$ sudo bootc switch quay.io/kubealex/rhel-bootc-vm:nginx
@@ -182,8 +182,8 @@ layers already present: 69; layers needed: 7 (182.7 MB)
   Digest: sha256:e9dc2975eea3510044934fde745c296b734e8ca6f76add0e92c350e73db54620
 ```
 
-In this case, unlike last time, the layers to retrieve were many more, as we changed big parts of the previous image.
-At the end of the process, it queued the actual switch after reboot. Let's verify that postgres and nginx are still not present at this time, and proceed with a reboot:
+この場合、前回とは異なり、前のイメージの大部分を変更したため、取得するレイヤーが多くなりました。
+プロセスの最後に、再起動後に実際の切り替えをキューに入れました。今のところ postgres と nginx がまだ存在しないことを確認し、再起動を実行しましょう：
 
 ```bash
 [bootc-user@localhost ~]$ systemctl status nginx postgresql
@@ -192,7 +192,7 @@ Unit postgresql.service could not be found.
 [bootc-user@localhost ~]$ sudo reboot
 ```
 
-Let's log back in!
+再度ログインしましょう！
 
 ```bash
  ~/▓▒░ ssh bootc-user@192.168.124.16
@@ -203,9 +203,9 @@ Last login: Mon Jul 29 12:26:13 2024 from 192.168.124.1
 
 ```
 
-You can already see that something changed, we have a different line in our message of the day, let's test if nginx and Postgresql are running and working!
+何かが変わったことがすでにわかります。Message of the Day の行が異なります。nginx と Postgresql が実行され動作しているかテストしましょう！
 
-Initialize the DB:
+DB を初期化：
 
 ```bash
 [root@rhel-bootc-vm-nginx ~]# postgresql-setup --initdb
@@ -213,13 +213,13 @@ Initialize the DB:
  * Initialized, logs are in /var/lib/pgsql/initdb_postgresql.log
 ```
 
-Restart the PGSQL service:
+PGSQL サービスを再起動：
 
 ```bash
 [root@rhel-bootc-vm-nginx ~]# systemctl restart postgresql
 ```
 
-And verify everything is up and running:
+そしてすべてが起動して実行されていることを確認：
 
 
 ```bash
@@ -272,7 +272,7 @@ Jul 29 12:39:52 localhost.localdomain postmaster[1340]: 2024-07-29 12:39:52.234 
 Jul 29 12:39:52 localhost.localdomain systemd[1]: Started PostgreSQL database server.
 ```
 
-Let's test if postgresql is working.
+postgresql が動作しているかテストしましょう。
 
 ```bash
 [bootc-user@localhost ~]$ sudo su -l postgres
@@ -284,8 +284,8 @@ Type "help" for help.
 postgres=#
 ```
 
-Now we can try and see if the nginx server is reachable, using our browser we can go to the VM IP on port 80 to check:
+ブラウザを使用して VM の IP のポート 80 にアクセスし、nginx サーバーに到達可能かテストできます：
 
 ![](./assets/vm-browser.png)
 
-Here we go, our VM is fully working. Of course we can use the new image to provision similar VMs that need the same pieces of software on them.
+これで、VM が完全に動作しています。もちろん、同じソフトウェアが必要な同様の VM をプロビジョニングするために新しいイメージを使用できます。

@@ -1,40 +1,40 @@
-# Use Case - Managing a RHEL Image Mode instance with Red Hat Insights.
+# ユースケース - Red Hat Insights で RHEL イメージモードインスタンスを管理
 
-In this example, we will build a container image from a Containerfile and we will generate a QCOW image to spin up a Virtual Machine in KVM and manage it with [Red Hat Insights](https://console.redhat.com/insights/dashboard)
+この例では、Containerfile からコンテナイメージをビルドし、KVM で仮想マシンを起動するための QCOW イメージを生成し、[Red Hat Insights](https://console.redhat.com/insights/dashboard) で管理します。
 
-The Containerfile in the example:
+この例の Containerfile では：
 
-- Updates packages
-- Installs tmux and mkpasswd to create a simple user password
-- Creates a *bootc-user* user in the image
-- Adds the wheel group to sudoers
-- Installs Insights Client
-- Adds a custom Message of the Day
+- パッケージを更新
+- シンプルなユーザーパスワードを作成するために tmux と mkpasswd をインストール
+- イメージ内に *bootc-user* ユーザーを作成
+- wheel グループを sudoers に追加
+- Insights Client をインストール
+- カスタム Message of the Day を追加
 
 <details>
-  <summary>Review Containerfile.insights</summary>
+  <summary>Containerfile.insights を確認</summary>
   ```dockerfile
   --8<-- "use-cases/image-mode-management-insights/Containerfile.insights"
   ```
 </details>
 
-## Building the image
+## イメージのビルド
 
-From the root folder of the repository, switch to the use case directory:
+リポジトリのルートフォルダから、ユースケースディレクトリに移動します：
 
 ```bash
 cd use-cases/image-mode-management-insights
 ```
 
-To build the image:
+イメージをビルドするには：
 
 ```bash
 podman build -f Containerfile.insights -t rhel-bootc-vm:insights .
 ```
 
-## Tagging and pushing the image
+## イメージのタグ付けとプッシュ
 
-To tag and push the image you can simply run (replace **YOURQUAYUSERNAME** with the account name):
+イメージをタグ付けしてプッシュするには、次のコマンドを実行します（**YOURQUAYUSERNAME** をアカウント名に置き換えてください）：
 
 
 ```bash
@@ -45,23 +45,23 @@ export QUAY_USER=YOURQUAYUSERNAME
 podman tag rhel-bootc-vm:ami quay.io/$QUAY_USER/rhel-bootc-vm:insights
 ```
 
-Log-in to Quay.io:
+Quay.io にログイン：
 
 ```bash
 podman login -u $QUAY_USER quay.io
 ```
 
-And push the image:
+そしてイメージをプッシュ：
 
 ```bash
 podman push quay.io/$QUAY_USER/rhel-bootc-vm:insights
 ```
 
-## Generating the QCOW image
+## QCOW イメージの生成
 
-To generate the QCOW image we will be using [bootc-image-builder](https://github.com/osbuild/bootc-image-builder) container image that will help us transitioning from our newly generated bootable container image to a VM image that can be used with KVM.
+QCOW イメージを生成するには、[bootc-image-builder](https://github.com/osbuild/bootc-image-builder) コンテナイメージを使用します。これにより、新しく生成したブータブルコンテナイメージから KVM で使用できる VM イメージへの移行が支援されます。
 
-Let's proceed with the QCOW image creation:
+QCOW イメージの作成に進みましょう：
 
 ```bash
 sudo podman run \
@@ -78,9 +78,9 @@ sudo podman run \
     quay.io/$QUAY_USER/rhel-bootc-vm:insights
 ```
 
-We will use the local image we just copied to save in the **output** folder our generated image.
+先ほどコピーしたローカルイメージを使用して、生成されたイメージを **output** フォルダに保存します。
 
-The process will take care of all required steps (deploying the image, SELinux configuration, filesystem configuration, ostree configuration, etc.), after a couple of minutes we will find in the output:
+プロセスは必要なすべての手順（イメージのデプロイ、SELinux 設定、ファイルシステム設定、ostree 設定など）を処理し、数分後に出力に以下が表示されます：
 
 ```bash
 Generating manifest-qcow2.json ... DONE
@@ -106,7 +106,7 @@ Build complete!
 
 ```
 
-Verify that under the *output/qcow2* folder we have our image ready to be used.
+*output/qcow2* フォルダ配下に使用可能なイメージがあることを確認：
 
 ```bash
  ~/ ▓▒░ tree output
@@ -116,9 +116,9 @@ output
     └── disk.qcow2
 ```
 
-## Create the VM in KVM
+## KVM で VM を作成
 
-We will now use the image to spin up our Virtual Machine in KVM.
+イメージを使用して KVM で仮想マシンを起動します。
 
 ```bash
 sudo virt-install \
@@ -130,60 +130,60 @@ sudo virt-install \
     --network network=default
 ```
 
-## Register the VM with Red Hat Insights
+## VM を Red Hat Insights に登録
 
-Once the VM is up and running, log-in using the **bootc-user/redhat** credentials:
+VM が起動して実行されたら、**bootc-user/redhat** の資格情報でログイン：
 
 ```bash
 VM_IP=$(sudo virsh -q domifaddr rhel-bootc-vm | awk '{ print $4 }' | cut -d"/" -f1) && ssh bootc-user@$VM_IP
 ```
 
-Register the VM with Red Hat Subscription Manager using your Red Hat ID:
+Red Hat ID を使用して Red Hat Subscription Manager に VM を登録：
 
 ```bash
 sudo subscription-manager register
 ```
 
-And then register it with Red Hat Insights:
+そして Red Hat Insights に登録：
 
 ```bash
 sudo insights-client --register
 ```
 
-After some seconds, the data will be uploaded and you can browse to [Red Hat Insights](https://console.redhat.com/insights/inventory) to check that your new host is registered.
+数秒後、データがアップロードされ、[Red Hat Insights](https://console.redhat.com/insights/inventory) にアクセスして新しいホストが登録されていることを確認できます。
 
-If you go in the host itself (it should be registered as *localhost*) you will see a dedicated section called **BOOTC** where information about the current image in use is shown, as in the picture.
+ホスト自体（*localhost* として登録されているはず）に移動すると、画像に示すように、使用中の現在のイメージに関する情報が表示される **BOOTC** という専用セクションが表示されます。
 
 ![](./assets/insights-install.png)
 
-## Optional - Update the image and visualize the changes on Red Hat Insights
+## オプション - イメージを更新して Red Hat Insights で変更を確認
 
-For showcasing how Red Hat Insights supports image updates, we also have an updated version, that adds an additional motd.
+Red Hat Insights がイメージ更新をサポートする方法を示すために、追加の motd を追加する更新版も用意しています。
 
 <details>
-  <summary>Review Containerfile.insights-update</summary>
+  <summary>Containerfile.insights-update を確認</summary>
   ```dockerfile
   --8<-- "use-cases/image-mode-management-insights/Containerfile.insights-update"
   ```
 </details>
 
-### Building the image
+### イメージのビルド
 
-From the root folder of the repository, switch to the use case directory:
+リポジトリのルートフォルダから、ユースケースディレクトリに移動します：
 
 ```bash
 cd use-cases/image-mode-management-insights
 ```
 
-To build the image:
+イメージをビルドするには：
 
 ```bash
 podman build -f Containerfile.insights-update -t rhel-bootc-vm:insights .
 ```
 
-### Tagging and pushing the image
+### イメージのタグ付けとプッシュ
 
-To tag and push the image you can simply run (replace **YOURQUAYUSERNAME** with the account name):
+イメージをタグ付けしてプッシュするには、次のコマンドを実行します（**YOURQUAYUSERNAME** をアカウント名に置き換えてください）：
 
 
 ```bash
@@ -194,55 +194,55 @@ export QUAY_USER=YOURQUAYUSERNAME
 podman tag rhel-bootc-vm:ami quay.io/$QUAY_USER/rhel-bootc-vm:insights
 ```
 
-Log-in to Quay.io:
+Quay.io にログイン：
 
 ```bash
 podman login -u $QUAY_USER quay.io
 ```
 
-And push the image:
+そしてイメージをプッシュ：
 
 ```bash
 podman push quay.io/$QUAY_USER/rhel-bootc-vm:insights
 ```
 
-### Updating the VM using the new image
+### 新しいイメージを使用した VM の更新
 
-Once the VM is up and running, log-in using the **bootc-user/redhat** credentials:
+VM が起動して実行されたら、**bootc-user/redhat** の資格情報でログイン：
 
 ```bash
 VM_IP=$(sudo virsh -q domifaddr rhel-bootc-vm | awk '{ print $4 }' | cut -d"/" -f1) && ssh bootc-user@$VM_IP
 ```
 
-Run the bootc upgrade command to update the OS to the lastest version:
+bootc upgrade コマンドを実行して OS を最新バージョンに更新：
 
 ```bash
 sudo bootc upgrade
 ```
 
-Run the insights-client utility to see the changes, as the new image will be shown as *available* and no rollback images is available since the upgrade still isn't applied.
+insights-client ユーティリティを実行して変更を確認します。アップグレードがまだ適用されていないため、新しいイメージは *available* として表示され、ロールバックイメージは利用できません。
 
 ```bash
 sudo insights-client
 ```
 
-Verify on the Console that you see the updated info on the image:
+コンソールでイメージに関する更新された情報が表示されることを確認：
 
 ![](./assets/insights-upgrade.png)
 
 
-Reboot the VM to apply the new update:
+VM を再起動して新しい更新を適用：
 
 ```bash
 sudo reboot
 ```
 
-And then re-run the Insights-client upload:
+そして Insights-client のアップロードを再実行：
 
 ```bash
 sudo insights-client
 ```
 
-Now the new version is applied, and if you check the console, no new update is scheduled, but you can see the rollback image pointing to the pre-upgrade image:
+これで新しいバージョンが適用され、コンソールを確認すると、新しい更新はスケジュールされていませんが、アップグレード前のイメージを指すロールバックイメージが表示されます：
 
 ![](./assets/insights-rollback.png)

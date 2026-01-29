@@ -1,22 +1,22 @@
-# 🎯🎯 Let's get started 🎯🎯
+# クイックスタート
 
-First of all, clone the repo:
+まず、リポジトリをクローンします：
 
 ```bash
-git clone https://github.com/redhat-cop/redhat-image-mode-demo
+git clone https://github.com/tnk4on/redhat-image-mode-demo
 ```
 
-Creating a container for RHEL Image Mode is as easy as writing and running a Containerfile like this:
+RHEL イメージモード用のコンテナを作成するのは、次のような Containerfile を書いて実行するだけで簡単です：
 
-!!! warning
-    To build images using RHEL bootc image you need a RHEL System with a valid subscription attached to it. For non-production workloads, you can register for a [free Red Hat developer subscription](https://developers.redhat.com/register).
+!!! warning "注意"
+    RHEL bootc イメージを使用してイメージをビルドするには、有効なサブスクリプションがアタッチされた RHEL システムが必要です。非本番ワークロードの場合は、[無料の Red Hat 開発者サブスクリプション](https://developers.redhat.com/register)に登録できます。
 
 
 ```dockerfile
 FROM registry.redhat.io/rhel10/rhel-bootc:10.1
 ```
 
-You can proceed customizing the image, adding users, packages, configurations, etc following the [Dockerfile Reference](https://docs.docker.com/reference/dockerfile/) as well as providing informative/documentation layers (MAINTAINER, LABEL, etc) following the best-practices of Containerfile creation.
+[Dockerfile リファレンス](https://docs.docker.com/reference/dockerfile/)に従って、ユーザー、パッケージ、設定などを追加してイメージをカスタマイズできます。また、Containerfile 作成のベストプラクティスに従って、情報/ドキュメント用のレイヤー（MAINTAINER、LABEL など）を提供することもできます。
 
-!!! tip
-    Some Dockerfile Directives (EXPOSE, ENTRYPOINT, ENV, among them) are ignored during RHEL Image deployment on a system, see [the documentation](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_image_mode_for_rhel_to_build_deploy_and_manage_operating_systems/building-and-testing-the-rhel-bootable-container-images_using-image-mode-for-rhel-to-build-deploy-and-manage-operating-systems#building-and-testing-the-rhel-bootable-container-images_using-image-mode-for-rhel-to-build-deploy-and-manage-operating-systems) for more details.
+!!! tip "ヒント"
+    一部の Dockerfile ディレクティブ（EXPOSE、ENTRYPOINT、ENV など）は、システムへの RHEL Image デプロイ時に無視されます。詳細は[ドキュメント](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_image_mode_for_rhel_to_build_deploy_and_manage_operating_systems/building-and-testing-the-rhel-bootable-container-images_using-image-mode-for-rhel-to-build-deploy-and-manage-operating-systems#building-and-testing-the-rhel-bootable-container-images_using-image-mode-for-rhel-to-build-deploy-and-manage-operating-systems)を参照してください。

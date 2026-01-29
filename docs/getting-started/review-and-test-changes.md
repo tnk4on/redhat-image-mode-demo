@@ -1,9 +1,9 @@
-# Reviewing and testing the changes
+# 変更のレビューとテスト
 
-Since documentation can contain snippets and markdown from [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) and [pymdown-extensions](https://facelessuser.github.io/pymdown-extensions/extensions/arithmatex/) projects, to properly test changes, whether while writing content or reviewing a Pull Request, a **Containerfile** is provided with the minimum packages to run the serving command for MkDocs.
+ドキュメントには [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) や [pymdown-extensions](https://facelessuser.github.io/pymdown-extensions/extensions/arithmatex/) プロジェクトのスニペットや Markdown が含まれる可能性があるため、コンテンツの作成中やプルリクエストのレビュー時に変更を適切にテストするために、MkDocs のサーブコマンドを実行するための最小限のパッケージを含む **Containerfile** が提供されています。
 
 <details>
-  <summary>Review Containerfile</summary>
+  <summary>Containerfile を確認</summary>
   ```dockerfile
     FROM registry.access.redhat.com/ubi9/python-312
     RUN pip3 install mkdocs mkdocs-material mkdocs-macros-plugin mkdocs mkdocs-mermaid2-plugin
@@ -11,35 +11,35 @@ Since documentation can contain snippets and markdown from [Material for MkDocs]
   ```
 </details>
 
-## Instructions to test changes
+## 変更をテストするための手順
 
-### Building the container image
+### コンテナイメージのビルド
 
-While writing content, from the root folder of the repository, simply build the image:
+コンテンツを作成しながら、リポジトリのルートフォルダから簡単にイメージをビルドできます：
 
 ```bash
 podman build -t mkdocs-testing .
 ```
 
-### Running the container
+### コンテナの実行
 
-??? warning "**Read here if you are reviewing a Pull Request**"
-    When reviewing a pull request, you need to create a temporary branch and fetch the content into it.
-    Assuming user **kubealex** proposed a Pull Request involving the **testing** branch:
+??? warning "**プルリクエストをレビューする場合はこちらをお読みください**"
+    プルリクエストをレビューする場合は、一時的なブランチを作成してコンテンツをフェッチする必要があります。
+    ユーザー **kubealex** が **testing** ブランチに関するプルリクエストを提案したと仮定します：
     ```bash
     git checkout -b kubealex-testing
     git pull https://github.com/kubealex/redhat-image-mode-demo.git testing
     ```
 
-After the image is built, simply run the container mounting the current folder:
+イメージがビルドされたら、現在のフォルダをマウントしてコンテナを実行するだけです：
 
 ```bash
 export HOST_PORT=8000
 podman run -it --user $(id -u) --network podman -p $HOST_PORT:8000 -v ./:/opt/app-root/src:rw,Z mkdocs-testing
 ```
 
-Replace the **HOST_PORT** variable with a free port on the host you are running the container.
+**HOST_PORT** 変数を、コンテナを実行しているホストの空いているポートに置き換えてください。
 
-If everything is working fine, the webserver will be listening on the desired port and reachable at the address [http://localhost:8000](http://localhost:8000)
+すべてが正常に動作していれば、ウェブサーバーは指定されたポートでリッスンし、[http://localhost:8000](http://localhost:8000) でアクセスできます。
 
 ![](./assets/mkdocs-serve.png)

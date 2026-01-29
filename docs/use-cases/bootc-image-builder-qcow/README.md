@@ -1,74 +1,74 @@
-# Use Case - Building a RHEL QCOW image using bootc-image-builder
+# ユースケース - bootc-image-builder を使用して RHEL QCOW イメージをビルド
 
-In this example, we will build a container image from a Containerfile and we will generate a QCOW image to spin up a Virtual Machine in KVM.
+この例では、Containerfile からコンテナイメージをビルドし、KVM で仮想マシンを起動するための QCOW イメージを生成します。
 
-The Containerfile in the example:
+この例の Containerfile では：
 
-- Updates packages
-- Installs tmux and mkpasswd to create a simple user password
-- Creates a *bootc-user* user in the image
-- Adds the wheel group to sudoers
-- Installs [Apache Server](https://httpd.apache.org/)
-- Enables the systemd unit for httpd
-- Adds a custom index.html
+- パッケージを更新
+- シンプルなユーザーパスワードを作成するために tmux と mkpasswd をインストール
+- イメージ内に *bootc-user* ユーザーを作成
+- wheel グループを sudoers に追加
+- [Apache Server](https://httpd.apache.org/) をインストール
+- httpd の systemd ユニットを有効化
+- カスタム index.html を追加
 
 <details>
-  <summary>Review Containerfile.qcow</summary>
+  <summary>Containerfile.qcow を確認</summary>
   ```dockerfile
   --8<-- "use-cases/bootc-image-builder-qcow/Containerfile.qcow"
   ```
 </details>
 
-## Building the image
+## イメージのビルド
 
-From the root folder of the repository, switch to the use case directory:
+リポジトリのルートフォルダから、ユースケースディレクトリに移動します：
 
 ```bash
 cd use-cases/bootc-image-builder-qcow
 ```
 
-To build the image:
+イメージをビルドするには：
 
 ```bash
 podman build -f Containerfile.qcow -t rhel-bootc-vm:qcow .
 ```
 
-## Testing the image
+## イメージのテスト
 
-You can now test it using:
+以下のコマンドでテストできます：
 
 ```bash
 podman run -it --name rhel-bootc-vm --hostname rhel-bootc-vm -p 8080:80 rhel-bootc-vm:qcow
 ```
 
-Note: The *"-p 8080:80"* part forwards the container's *http* port to the port 8080 on the host to test that it is working.
+注意: *"-p 8080:80"* の部分は、コンテナの *http* ポートをホストの 8080 ポートに転送して、動作をテストします。
 
-The container will now start and a login prompt will appear.
+コンテナが起動し、ログインプロンプトが表示されます。
 
-On another terminal tab or in your browser, you can verify that the httpd server is working and serving traffic.
+別のターミナルタブまたはブラウザで、httpd サーバーが動作してトラフィックを処理していることを確認できます。
 
-**Terminal**
+**ターミナル**
 
 ```bash
  ~ ▓▒░ curl localhost:8080
 Welcome to the bootc-http instance!
 ```
 
-**Browser**
+**ブラウザ**
 
 ![](./assets/browser-test.png)
 
-## Generating the QCOW image
+## QCOW イメージの生成
 
-To generate the QCOW image we will be using [bootc-image-builder](https://github.com/osbuild/bootc-image-builder) container image that will help us transitioning from our newly generated bootable container image to a VM image that can be used with KVM.
+QCOW イメージを生成するには、[bootc-image-builder](https://github.com/osbuild/bootc-image-builder) コンテナイメージを使用します。これにより、新しく生成したブータブルコンテナイメージから KVM で使用できる VM イメージへの移行が支援されます。
 
-The bootc-image-builder container will need **rootful** access to run, so the first thing we need to do is copying the image from our current user (the one we built the image with) to *root*:
+bootc-image-builder コンテナは **rootful** アクセスを必要として実行されるため、最初に行う必要があるのは、現在のユーザー（イメージをビルドしたユーザー）から *root* にイメージをコピーすることです：
 
 ```bash
 podman image scp $(whoami)@localhost::rhel-bootc-vm:qcow
 ```
 
-Now, verify that the image is correctly present for root user:
+次に、root ユーザーにイメージが正しく存在することを確認：
 
 ```bash
  ~ ▓▒░ sudo podman images
@@ -76,8 +76,8 @@ REPOSITORY                                TAG         IMAGE ID      CREATED     
 localhost/rhel-bootc-vm                 qcow        0ee1017eb9bc  7 minutes ago  1.81 GB
 ```
 
-We are now ready!
-Let's proceed with the QCOW image creation:
+準備完了です！
+QCOW イメージの作成に進みましょう：
 
 ```bash
 sudo podman run \
@@ -95,9 +95,9 @@ sudo podman run \
     localhost/rhel-bootc-vm:qcow
 ```
 
-We will use the local image we just copied to save in the **output** folder our generated image.
+先ほどコピーしたローカルイメージを使用して、生成されたイメージを **output** フォルダに保存します。
 
-The process will take care of all required steps (deploying the image, SELinux configuration, filesystem configuration, ostree configuration, etc.), after a couple of minutes we will find in the output:
+プロセスは必要なすべての手順（イメージのデプロイ、SELinux 設定、ファイルシステム設定、ostree 設定など）を処理し、数分後に出力に以下が表示されます：
 
 ```bash
 Generating manifest-qcow2.json ... DONE
@@ -123,7 +123,7 @@ Build complete!
 
 ```
 
-Verify that under the *output/qcow2* folder we have our image ready to be used.
+*output/qcow2* フォルダ配下に使用可能なイメージがあることを確認：
 
 ```bash
  ~/ ▓▒░ tree output
@@ -133,9 +133,9 @@ output
     └── disk.qcow2
 ```
 
-## Create the VM in KVM
+## KVM で VM を作成
 
-We will now use the image to spin up our Virtual Machine in KVM.
+イメージを使用して KVM で仮想マシンを起動します。
 
 ```bash
 sudo virt-install \
@@ -147,7 +147,7 @@ sudo virt-install \
     --network network=default
 ```
 
-Wait for the VM to be ready and retrieve the IP address for the domain to log-in using SSH using *bootc-user/redhat* credentials:
+VM が準備完了するのを待ち、*bootc-user/redhat* の資格情報を使用して SSH でログインするためのドメインの IP アドレスを取得：
 
 ```bash
  ~ ▓▒░ VM_IP=$(sudo virsh -q domifaddr rhel-bootc-vm | awk '{ print $4 }' | cut -d"/" -f1) && ssh bootc-user@$VM_IP

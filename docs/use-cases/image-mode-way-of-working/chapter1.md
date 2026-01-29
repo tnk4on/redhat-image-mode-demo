@@ -1,17 +1,17 @@
-## Build the demo base image for RHEL
+## RHEL 用のデモ基本イメージをビルド
 
-The first steps we will build our base SOE (golden) image that we are going to use within the workshop. We will start with RHEL 9 and during the workshop update to RHEL 10.
+最初のステップでは、ワークショップで使用する基本 SOE（ゴールデン）イメージをビルドします。RHEL 9 から始めて、ワークショップ中に RHEL 10 に更新します。
 
-We will name our SOE (Standard Operating Environment/Golden) image `soe-rhel:9` and also tag it as our latest rhel base image as `soe-rhel:latest`.
+SOE（Standard Operating Environment/Golden）イメージを `soe-rhel:9` と名付け、最新の rhel 基本イメージとして `soe-rhel:latest` とタグ付けします。
 
-1. Use podman to build our soe base RHEL "golden image". Change to the directory where you have cloned this repo and use `podman build` to build the image from the `Containerfile`. The following command will work if you cloned it into your home directory.
+1. podman を使用して soe 基本 RHEL「ゴールデンイメージ」をビルドします。このリポジトリをクローンしたディレクトリに移動し、`podman build` を使用して `Containerfile` からイメージをビルドします。ホームディレクトリにクローンした場合、以下のコマンドが動作します。
 
     ```bash
     cd $HOME/redhat-image-mode-demo/use-cases/image-mode-way-of-working/soe-rhel9
     ```
 
     <details>
-    <summary>Review soe-rhel9/Containerfile</summary>
+    <summary>soe-rhel9/Containerfile を確認</summary>
     ```dockerfile
     --8<-- "use-cases/image-mode-way-of-working/soe-rhel9/Containerfile"
     ```
@@ -21,78 +21,78 @@ We will name our SOE (Standard Operating Environment/Golden) image `soe-rhel:9` 
     podman build -t quay.io/$QUAY_USER/soe-rhel:latest -t quay.io/$QUAY_USER/soe-rhel:9 -f Containerfile
     ```
 
-2. If we want to test our image we can run it in a container. You can log in with user `bootc-user` and password `redhat` and run `curl localhost` to test if the httpd service is running and you can see the base image welcome page. You can stop and exit the container with `sudo halt`. We are going to run our container in the next step to check that the httpd service is running and that we can see our homepage before deploying it to a VM.
+2. イメージをテストしたい場合はコンテナで実行できます。ユーザー `bootc-user` とパスワード `redhat` でログインし、`curl localhost` を実行して httpd サービスが動作しているか、基本イメージのウェルカムページが表示されるかテストできます。`sudo halt` でコンテナを停止して終了できます。次のステップでコンテナを実行して、httpd サービスが動作しているか、VM にデプロイする前にホームページが表示されるかを確認します。
 
     ```bash
     podman run -it --rm --name soe-rhel9 -p 8080:80 quay.io/$QUAY_USER/soe-rhel:9
     ```
 
-3. Push the base rhel image to our registry.
+3. 基本 rhel イメージをレジストリにプッシュ。
 
     ```bash
     podman push quay.io/$QUAY_USER/soe-rhel:latest && podman push quay.io/$QUAY_USER/soe-rhel:9
     ```
 
-!!! tip
-    We could base the initial image on an older release of RHEL, such as `rhel:9.6`, or a specific timestamp version of RHEL such as `rhel:9.6-1747275992`, or fix it at a certain release such as `rhel:9.7`, instead of pulling the latest release by specifying the release number in the Containerfile `FROM` statement.
+!!! tip "ヒント"
+    初期イメージを古いリリースの RHEL（`rhel:9.6` など）、特定のタイムスタンプバージョンの RHEL（`rhel:9.6-1747275992` など）、または特定のリリース（`rhel:9.7` など）に固定することもできます。Containerfile の `FROM` 文でリリース番号を指定します。
 
-## Deploying the Homepage Virtual Machine
+## ホームページ仮想マシンのデプロイ
 
-We need to create an image for our httpd service based on the RHEL 9 base image we created in the previous step.
-We will name our httpd service image `httpd:rhel9` and also tag it as our latest rhel base image as `httpd:latest`.
+前のステップで作成した RHEL 9 基本イメージに基づいて httpd サービス用のイメージを作成する必要があります。
+httpd サービスイメージを `httpd:rhel9` と名付け、最新の rhel 基本イメージとして `httpd:latest` とタグ付けします。
 
-1. Use podman to build httpd service image. Change to the httpd-service folder.
+1. podman を使用して httpd サービスイメージをビルドします。httpd-service フォルダに移動します。
 
     ```bash
     cd ../httpd-service
     ```
 
     <details>
-    <summary>Review httpd-service/Containerfile</summary>
+    <summary>httpd-service/Containerfile を確認</summary>
     ```dockerfile
     --8<-- "use-cases/image-mode-way-of-working/httpd-service/Containerfile"
     ```
     </details>
 
-1. Change the $QUAY_USER in the `Containerfile` to your Quay userid or your registry.
+1. `Containerfile` の $QUAY_USER を Quay ユーザー ID またはレジストリに変更します。
 
-2. Use `podman build` to build the image from the `Containerfile`.
+2. `podman build` を使用して `Containerfile` からイメージをビルドします。
 
     ```bash
     podman build -t quay.io/$QUAY_USER/httpd:latest -t quay.io/$QUAY_USER/httpd:rhel9 -f Containerfile
     ```
 
-3. Push the httpd service image to our registry.
+3. httpd サービスイメージをレジストリにプッシュ。
 
     ```bash
     podman push quay.io/$QUAY_USER/httpd:latest && podman push quay.io/$QUAY_USER/httpd:rhel9
     ```
 
-4. If we want to test our image we can run it in a container.
+4. イメージをテストしたい場合はコンテナで実行できます。
     ```bash
     podman run -it --rm --name httpd-rhel9 -p 8080:80 quay.io/$QUAY_USER/httpd:rhel9
     ```
 
-5. You can log in with user `bootc-user` and password `redhat` and run `curl localhost` to test if the httpd service is running and you can see the base image welcome page. You can test the homepage in a browser on the local machine by using the URL `http://localhost:8080`. You can stop and exit the container with `sudo halt`.
+5. ユーザー `bootc-user` とパスワード `redhat` でログインし、`curl localhost` を実行して httpd サービスが動作しているか、基本イメージのウェルカムページが表示されるかテストできます。ローカルマシンのブラウザで URL `http://localhost:8080` を使用してホームページをテストできます。`sudo halt` でコンテナを停止して終了できます。
 
-Now we are ready to create the virtual machine disk image that we are going to import into our new VM.
+これで、新しい VM にインポートする仮想マシンディスクイメージを作成する準備ができました。
 
-Since we need to run the Image Builder convert tool as superuser we need to pull the image from the registry using sudo to add it to sudo's image repository.
+Image Builder 変換ツールをスーパーユーザーとして実行する必要があるため、sudo を使用してレジストリからイメージをプルし、sudo のイメージリポジトリに追加する必要があります。
 
 
-1. Since we need to run podman as root to build the virtual machine qcow2 image file, we need to pull the image as root.
+1. 仮想マシン qcow2 イメージファイルをビルドするために podman を root として実行する必要があるため、イメージを root としてプルする必要があります。
 
-    !!! tip
-        You may also get an error `Error: unable to copy from source`. You need to go to your repository, in our example, Quay, and make the repositories `public`.
+    !!! tip "ヒント"
+        `Error: unable to copy from source` というエラーが表示される場合があります。レジストリ（この例では Quay）に移動してリポジトリを `public` にする必要があります。
 
     ```bash
     sudo podman pull quay.io/$QUAY_USER/httpd:latest
     ```
 
-2. We need to use podman to run the Image Mode virtual machine disk builder to pull the image from the registry and create the virtual machine disk file. You can edit the `config.toml `file to change it to add or replace the user, password, ssh key and more. Refer to [Supported image customizations for a configuration file](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/using_image_mode_for_rhel_to_build_deploy_and_manage_operating_systems/index#supported-image-customizations-for-a-configuration-file_creating-bootc-compatible-base-disk-images-with-bootc-image-builder).
+2. podman を使用して イメージモード仮想マシンディスクビルダーを実行し、レジストリからイメージをプルして仮想マシンディスクファイルを作成する必要があります。`config.toml` ファイルを編集してユーザー、パスワード、ssh キーなどを追加または置換できます。[設定ファイルでサポートされているイメージカスタマイズ](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/using_image_mode_for_rhel_to_build_deploy_and_manage_operating_systems/index#supported-image-customizations-for-a-configuration-file_creating-bootc-compatible-base-disk-images-with-bootc-image-builder)を参照してください。
 
-    !!! tip
-        If you get an error `Error: unable to copy from source` you may have to do a `sudo podman login registry.redhat.io -u $REDHAT_USER -p $REDHAT_PASSWORD`.
+    !!! tip "ヒント"
+        `Error: unable to copy from source` というエラーが表示される場合は、`sudo podman login registry.redhat.io -u $REDHAT_USER -p $REDHAT_PASSWORD` を実行する必要があるかもしれません。
 
     ```bash
     sudo podman run \
@@ -108,16 +108,16 @@ Since we need to run the Image Builder convert tool as superuser we need to pull
     quay.io/$QUAY_USER/httpd:latest
     ```
 
-3. We will copy the new disk image to the libvirt images pool.
+3. 新しいディスクイメージを libvirt イメージプールにコピーします。
 
-    !!! tip
-        You can move the disk image if you don't plan to use it for another VM using the mv command.
+    !!! tip "ヒント"
+        別の VM に使用する予定がない場合は、mv コマンドを使用してディスクイメージを移動できます。
 
     ```bash
     sudo cp ./qcow2/disk.qcow2 /var/lib/libvirt/images/homepage.qcow2
     ```
 
-4. Create the VM from the copied virtual machine image qcow2 file. We will give it 4GB of RAM and set the boot option to UEFI.
+4. コピーした仮想マシンイメージ qcow2 ファイルから VM を作成します。4GB の RAM を割り当て、ブートオプションを UEFI に設定します。
 
     ```bash
     sudo virt-install \
@@ -133,33 +133,33 @@ Since we need to run the Image Builder convert tool as superuser we need to pull
     --disk /var/lib/libvirt/images/homepage.qcow2
     ```
 
-5. Start the VM.
+5. VM を起動。
 
     ```bash
     sudo virsh start homepage
     ```
 
-6. Login via ssh. You can use the following command that will get the IP address from virsh and log you in.
+6. ssh でログイン。以下のコマンドを使用すると、virsh から IP アドレスを取得してログインできます。
 
     ```bash
     VM_IP=$(sudo virsh -q domifaddr homepage | awk '{ print $4 }' | cut -d"/" -f1) && ssh bootc-user@$VM_IP
     ```
 
-7. You can run a `curl localhost` to check if the httpd service with our base image homepage is working. Exit the VM with `exit`, `logout` or Ctrl-d.
+7. `curl localhost` を実行して、基本イメージのホームページを持つ httpd サービスが動作しているか確認できます。`exit`、`logout`、または Ctrl-d で VM を終了します。
 
-8. Since we are going to refer to the quay.io registry, let us add $QUAY_USER to our .bashrc file.
+8. quay.io レジストリを参照するため、.bashrc ファイルに $QUAY_USER を追加しましょう。
 
     ```bash
     sed -i '/unset rc[^\n]*/,$!b;//{x;//p;g};//!H;$!d;x;iexport QUAY_USER="your quay.io username not the email address"' .bashrc
     ```
 
-9. and reload the .bashrc file to bring QUAY_USER into the variables.
+9. .bashrc ファイルをリロードして QUAY_USER を変数に取り込みます。
 
     ```bash
     source .bashrc
     ```
 
-10. Finally for this section run the bootc status command to view the booted image registry source and the RHEL version.
+10. 最後に、このセクションで bootc status コマンドを実行して、起動したイメージのレジストリソースと RHEL バージョンを確認します。
 
     ```bash
     sudo bootc status
@@ -171,53 +171,53 @@ Since we need to run the Image Builder convert tool as superuser we need to pull
         Version: 9.7 (2025-07-21 13:10:35.887718188 UTC)
     ```
 
-Our virtual machine based on Image Mode is now running and we are ready to make updates to the web page.
+イメージモードに基づく仮想マシンが実行されており、Web ページを更新する準備ができました。
 
-## Update the Homepage VM to our Image Mode web page
+## ホームページ VM をイメージモード Web ページに更新
 
-The next steps we will update the web page in our `homepage` VM from the basic RHEL webpage that we created to an more updated web page showing the advantages of using Image Mode.
+次のステップでは、作成した基本 RHEL Web ページから イメージモードの利点を示すより更新された Web ページに `homepage` VM の Web ページを更新します。
 
-On our image builder server we will build a new Image Mode for RHEL 9 homepage image that we will deploy to the VM.
+イメージビルダーサーバーで、VM にデプロイする新しい RHEL 9 用イメージモードホームページイメージをビルドします。
 
-1. Change directory to the new web page Container file and the *RHEL 9 Image Mode* web page at `homepage-rhel9`. You can open the `index.html` file in the `html` directory to see the updates to the homepage.
+1. 新しい Web ページ Container file と `homepage-rhel9` の *RHEL 9 イメージモード* Web ページのディレクトリに移動します。`html` ディレクトリの `index.html` ファイルを開いてホームページの更新を確認できます。
 
     ```bash
     cd ../homepage-rhel9
     ```
 
-2. Build the new homepage images from the `Containerfile`.
+2. `Containerfile` から新しいホームページイメージをビルドします。
 
     <details>
-    <summary>Review homepage-rhel9/Containerfile</summary>
+    <summary>homepage-rhel9/Containerfile を確認</summary>
     ```dockerfile
     --8<-- "use-cases/image-mode-way-of-working/homepage-rhel9/Containerfile"
     ```
     </details>
 
-    !!! tip
-        Remeber to change the $QUAY_USER in the `Containerfile` to your repository userid.
-        Remeber to make the homepage repository on your Quay registry public.
+    !!! tip "ヒント"
+        `Containerfile` の $QUAY_USER をリポジトリのユーザー ID に変更することを忘れないでください。
+        Quay レジストリのホームページリポジトリを public にすることを忘れないでください。
 
     ```bash
     podman build -t quay.io/$QUAY_USER/homepage:rhel9 -t quay.io/$QUAY_USER/homepage:latest -f Containerfile
     ```
 
-3. Push the image to the registry using the `homepage:rhel9` and `homepage:latest` tags.
+3. `homepage:rhel9` と `homepage:latest` タグを使用してイメージをレジストリにプッシュ。
 
     ```bash
     podman push quay.io/$QUAY_USER/homepage:latest && podman push quay.io/$QUAY_USER/homepage:rhel9
     ```
 
-4. Switch to the Homepage virtual machine and login to the `homepage` VM using ssh.
+4. ホームページ仮想マシンに切り替えて、ssh を使用して `homepage` VM にログインします。
 
     ```bash
     VM_IP=$(sudo virsh -q domifaddr homepage | awk '{ print $4 }' | cut -d"/" -f1) && ssh bootc-user@$VM_IP
     ```
 
-5. We are now going to use the `bootc switch` command to switch the virtual machine to the homepage image in the registry.
+5. `bootc switch` コマンドを使用して、仮想マシンをレジストリのホームページイメージに切り替えます。
 
-    !!! tip
-        If you didn't add the `$QUAY_USER` to the `.bashrc` file then run the following
+    !!! tip "ヒント"
+        `.bashrc` ファイルに `$QUAY_USER` を追加していない場合は、以下を実行してください
 
     ```bash
     QUAY_USER="your quay.io username not the email address"
@@ -227,7 +227,7 @@ On our image builder server we will build a new Image Mode for RHEL 9 homepage i
     sudo bootc switch quay.io/$QUAY_USER/homepage:latest
     ```
 
-6. Let us check the we have staged the new homepage image in the virtual machine.
+6. 仮想マシンに新しいホームページイメージがステージングされていることを確認しましょう。
 
     ```bash
     sudo bootc status
@@ -243,87 +243,87 @@ On our image builder server we will build a new Image Mode for RHEL 9 homepage i
             Version: 9.7 (2025-07-21 13:10:35.887718188 UTC)
     ```
 
-7. and we check that we have the old RHEL 9 homepage without our new Image Mode content.
+7. 新しいイメージモードコンテンツのない古い RHEL 9 ホームページがあることを確認します。
 
     ```bash
     curl localhost
     ```
 
-8. We need to reboot the virtual machine to activate the new layers and have our new home page.
+8. 新しいレイヤーを有効化して新しいホームページを表示するために仮想マシンを再起動する必要があります。
 
     ```bash
     sudo reboot
     ```
 
-9. Login to the virtual machine to verify that we have a new updated Image Mode homepage.
+9. 仮想マシンにログインして、新しく更新されたイメージモードホームページがあることを確認します。
 
     ```bash
     VM_IP=$(sudo virsh -q domifaddr homepage | awk '{ print $4 }' | cut -d"/" -f1) && ssh bootc-user@$VM_IP
     curl localhost
     ```
 
-10. Something went wrong! Our httpd service has failed during the update! Let us check the service.
+10. 何かが間違っています！更新中に httpd サービスが失敗しました！サービスを確認しましょう。
 
     ```bash
     sudo systemctl status httpd
     ```
 
-11. There is no httpd service. We will rollback in the next section and fix the problem.
+11. httpd サービスがありません。次のセクションでロールバックして問題を修正します。
 
-## Rollback and fix our homepage
+## ロールバックしてホームページを修正
 
-In the previous section the httpd service wasn't in the image. This is due to a mistake we made in the Containerfile. First, we will rollback so that we have the old homepage up and running, and then we will fix the problem.
+前のセクションでは、httpd サービスがイメージにありませんでした。これは Containerfile で間違いを犯したためです。まず、古いホームページを起動して実行できるようにロールバックし、その後問題を修正します。
 
-On our image builder server we will build a new Image Mode for RHEL 9 homepage image that we will deploy to the VM.
+イメージビルダーサーバーで、VM にデプロイする新しい RHEL 9 用イメージモードホームページイメージをビルドします。
 
-1. In the homepage VM we will issue the rollback command, and use the `--apply` flag to automatically reboot the VM.
+1. ホームページ VM でロールバックコマンドを発行し、`--apply` フラグを使用して VM を自動的に再起動します。
 
    ```bash
    sudo bootc rollback --apply
    ```
-2. You should have been exited from the VM. If you aren't in the `homepage-rhel9` directory then change directory to the new web page Container file and the updated web page at `homepage-rhel9`. You can open the `index.html` file in the `html` directory to see the updates to the homepage.
+2. VM から終了しているはずです。`homepage-rhel9` ディレクトリにいない場合は、新しい Web ページ Container file と更新された Web ページの `homepage-rhel9` ディレクトリに移動してください。`html` ディレクトリの `index.html` ファイルを開いてホームページの更新を確認できます。
 
     ```bash
     cd ../homepage-rhel9
     ```
 
-3. We need to fix the Containerfile to pull the correct image from the registry. Use an editor to change the following line to
+3. レジストリから正しいイメージをプルするように Containerfile を修正する必要があります。エディタを使用して以下の行を変更します
 
-    !!! tip
-        Remeber to change the $QUAY_USER in the `Containerfile` to your repository userid.
+    !!! tip "ヒント"
+        `Containerfile` の $QUAY_USER をリポジトリのユーザー ID に変更することを忘れないでください。
 
     ```dockerfile
     FROM quay.io/$QUAY_USER/soe-rhel:latest
     ```
 
-    change to
+    を以下に変更
 
     ```dockerfile
     FROM quay.io/$QUAY_USER/httpd:latest
     ```
 
-4. Build the new homepage images from the `Containerfile` and tag to a new version `homepage:rhel9-fix`.
+4. `Containerfile` から新しいホームページイメージをビルドし、新しいバージョン `homepage:rhel9-fix` としてタグ付けします。
 
     ```bash
     podman build -t quay.io/$QUAY_USER/homepage:rhel9-fix -t quay.io/$QUAY_USER/homepage:latest -f Containerfile
     ```
 
-5. Push the image to the registry using the `homepage:rhel9-fix` and `homepage:latest` tags.
+5. `homepage:rhel9-fix` と `homepage:latest` タグを使用してイメージをレジストリにプッシュ。
 
     ```bash
     podman push quay.io/$QUAY_USER/homepage:latest && podman push quay.io/$QUAY_USER/homepage:rhel9-fix
     ```
 
-6. Switch to the Homepage virtual machine and login to the `homepage` VM using ssh.
+6. ホームページ仮想マシンに切り替えて、ssh を使用して `homepage` VM にログインします。
 
     ```bash
     VM_IP=$(sudo virsh -q domifaddr homepage | awk '{ print $4 }' | cut -d"/" -f1) && ssh bootc-user@$VM_IP
     ```
 
-7. We are going to use the `bootc switch` command to switch the virtual machine to the homepage image in the registry.
+7. `bootc switch` コマンドを使用して、仮想マシンをレジストリのホームページイメージに切り替えます。
 
-    !!! tip
-        If you didn't add the `$QUAY_USER` to the `.bashrc` file then run the following
+    !!! tip "ヒント"
+        `.bashrc` ファイルに `$QUAY_USER` を追加していない場合は、以下を実行してください
 
     ```bash
     QUAY_USER="your quay.io username not the email address"
@@ -333,7 +333,7 @@ On our image builder server we will build a new Image Mode for RHEL 9 homepage i
     sudo bootc switch quay.io/$QUAY_USER/homepage:latest
     ```
 
-8. Let us check the we have staged the new homepage image in the virtual machine.
+8. 仮想マシンに新しいホームページイメージがステージングされていることを確認しましょう。
 
     ```bash
     sudo bootc status
@@ -349,19 +349,19 @@ On our image builder server we will build a new Image Mode for RHEL 9 homepage i
             Version: 9.7 (2025-07-21 13:10:35.887718188 UTC)
     ```
 
-9. and we check that we have the old RHEL 9 homepage without our new Image Mode content.
+9. 新しいイメージモードコンテンツのない古い RHEL 9 ホームページがあることを確認します。
 
     ```bash
     curl localhost
     ```
 
-10. We need to reboot the virtual machine to activate the new layers and have our new home page.
+10. 新しいレイヤーを有効化して新しいホームページを表示するために仮想マシンを再起動する必要があります。
 
     ```bash
     sudo reboot
     ```
 
-11. Login to the virtual machine to verify that we have a new updated Image Mode homepage.
+11. 仮想マシンにログインして、新しく更新されたイメージモードホームページがあることを確認します。
 
     ```bash
     VM_IP=$(sudo virsh -q domifaddr homepage | awk '{ print $4 }' | cut -d"/" -f1) && ssh bootc-user@$VM_IP
@@ -371,50 +371,50 @@ On our image builder server we will build a new Image Mode for RHEL 9 homepage i
     curl localhost
     ```
 
-## Build the database virtual machine
+## データベース仮想マシンのビルド
 
-We will then deploy a new virtual machine named `database` as this will be our new demo database server.
-We will build the two images in one linked command and push it as the version 1 and latest images to our registry.
+次に、新しいデモデータベースサーバーとして `database` という名前の新しい仮想マシンをデプロイします。
+1つのリンクされたコマンドで2つのイメージをビルドし、バージョン 1 と最新のイメージとしてレジストリにプッシュします。
 
-We are following a less complex deployment for the database server than the deployment we did for the homepage.
-We are going to deploy the mariadb service using a bash script to automate the deployment.
+ホームページで行ったデプロイよりも複雑でないデプロイをデータベースサーバーに対して行っています。
+デプロイを自動化する bash スクリプトを使用して mariadb サービスをデプロイします。
 
-In the `mariadb_service` directory update the QUAY_USER variable in the `mariadb-deploy-rhel9.sh` file and the `Containerfile` with your quay user id.
+`mariadb_service` ディレクトリで、`mariadb-deploy-rhel9.sh` ファイルと `Containerfile` の QUAY_USER 変数を quay ユーザー ID で更新してください。
 
 <details>
-  <summary>Review mariadb-service/mariadb-deploy-rhel9.sh</summary>
+  <summary>mariadb-service/mariadb-deploy-rhel9.sh を確認</summary>
   ```dockerfile
   --8<-- "use-cases/image-mode-way-of-working/mariadb-service/mariadb-deploy-rhel9.sh"
   ```
 </details>
 
-and the Containerfile
+そして Containerfile
 
 <details>
-  <summary>Review mariadb-service/Containerfile</summary>
+  <summary>mariadb-service/Containerfile を確認</summary>
   ```dockerfile
   --8<-- "use-cases/image-mode-way-of-working/mariadb-service/Containerfile"
   ```
 </details>
 
-1. Change to the `mariadb-service` directory.
+1. `mariadb-service` ディレクトリに移動。
 
     ```bash
     cd ../mariadb-service
     ```
 
-2. Ensure that the `mariadb-deploy.sh` file is executable.
+2. `mariadb-deploy.sh` ファイルが実行可能であることを確認。
 
     ```bash
     chmod +x mariadb-deploy.sh
     ```
 
-3. Edit the mariadb-deploy.sh file and change the entry for the QUAY_USER to your quay.io user name.
+3. mariadb-deploy.sh ファイルを編集して QUAY_USER のエントリを quay.io ユーザー名に変更します。
 
-4. Run the bash script `mariadb-deploy.sh` to create the database images and the database VM.
+4. bash スクリプト `mariadb-deploy.sh` を実行してデータベースイメージとデータベース VM を作成。
 
     ```bash
     ./mariadb_deploy.sh
     ```
 
-This will build and push the mariadb service image and deploy the VM from the image.
+これにより、mariadb サービスイメージがビルドおよびプッシュされ、イメージから VM がデプロイされます。

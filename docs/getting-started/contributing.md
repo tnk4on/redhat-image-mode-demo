@@ -1,46 +1,46 @@
-# How to contribute to the project
+# プロジェクトへの貢献方法
 
-Contributions are more than welcome, as it's the only way to ensure quality and keep projects alive, and to keep consistency it's great to have some guidance when starting to submit and be part of the changes.
+貢献は大歓迎です。品質を確保しプロジェクトを活性化させる唯一の方法だからです。一貫性を保つために、変更の提出を始める際にガイダンスがあると便利です。
 
-Here are a few guidelines that can be useful when contributing.
+以下は、貢献時に役立つガイドラインです。
 
-## Project structure
+## プロジェクト構造
 
-The project is structured to host:
+プロジェクトは以下をホストするように構成されています：
 
-- the operative files (Containerfiles, additional configurations) in the [use cases folder]({{ config.repo_url}}{{ config.edit_uri }}/use-cases/)
-- the documentation for the doc website [https://redhat-cop.github.io/redhat-image-mode-demo/](https://redhat-cop.github.io/redhat-image-mode-demo/) in the [docs folder]({{ config.repo_url}}{{ config.edit_uri }}/docs/use-cases)
+- 操作ファイル（Containerfile、追加設定）は [use cases フォルダ]({{ config.repo_url}}{{ config.edit_uri }}/use-cases/) に配置
+- ドキュメントウェブサイト用のドキュメントは [docs フォルダ]({{ config.repo_url}}{{ config.edit_uri }}/docs/use-cases) に配置
 
-The documentation uses [mkdocs](https://mkdocs.org) with the [mkdocs Material theme](https://squidfunk.github.io/mkdocs-material/) to render the markdown pages into the site.
+ドキュメントは [mkdocs](https://mkdocs.org) と [mkdocs Material テーマ](https://squidfunk.github.io/mkdocs-material/) を使用して、Markdown ページをサイトにレンダリングしています。
 
-## Working on existing use cases
+## 既存のユースケースでの作業
 
-If you want to contribute with fixes or enhancement for already existing use cases, you can go straight to the content in the **docs/use-cases/** folder of the corresponding use case and start working on it. If changes are needed on the core part, you can work in the corresponding dedicated folder under **use-cases/**.
+既存のユースケースの修正や機能強化に貢献したい場合は、対応するユースケースの **docs/use-cases/** フォルダ内のコンテンツに直接アクセスして作業を開始できます。コア部分に変更が必要な場合は、**use-cases/** 下の対応する専用フォルダで作業できます。
 
-## Working on new use cases
+## 新しいユースケースでの作業
 
-### Operating on the use case folders
+### ユースケースフォルダでの操作
 
-To contribute with new use cases, you can create a new folder in the **docs/use-cases/** and **use-cases/** folders with a meaningful name. 
+新しいユースケースで貢献するには、**docs/use-cases/** および **use-cases/** フォルダに意味のある名前で新しいフォルダを作成できます。
 
-The README.md of each single use case should contain minimal information about the use case and a link to the Document Site section corresponding to it.
+各ユースケースの README.md には、ユースケースに関する最小限の情報と、対応するドキュメントサイトセクションへのリンクを含める必要があります。
 
-To include snippets within the repo you can follow the [Pymdownx-snippets plugin documentation](https://facelessuser.github.io/pymdown-extensions/extensions/snippets/). 
+リポジトリ内にスニペットを含めるには、[Pymdownx-snippets プラグインのドキュメント](https://facelessuser.github.io/pymdown-extensions/extensions/snippets/)に従ってください。
 
-Paths are *relative to the root of the repository*, below an example to include a snippet coming from *use-cases/bootc-container-anaconda-ks* folder into the doc file in *docs/use-cases/bootc-container-anaconda-ks":
+パスは*リポジトリのルートからの相対パス*です。以下は、*use-cases/bootc-container-anaconda-ks* フォルダからスニペットを *docs/use-cases/bootc-container-anaconda-ks* 内のドキュメントファイルに含める例です：
 
-```` markdown title="Including a snippet in a page"
+```` markdown title="ページにスニペットを含める例"
 ```
 ;--8<-- "use-cases/bootc-container-anaconda-ks/ks.cfg"
 ```
 ````
 
-When directly linking files within the repo, use direct linking to the GitHub repo, accessible using the variables **\{\{ config.repo_url }}\{\{ config.edit_uri }}** that points to the root (/blob/main/) folder of the repository, to avoid direct download within the browser.
+リポジトリ内のファイルに直接リンクする場合は、ブラウザ内での直接ダウンロードを避けるために、リポジトリのルート（/blob/main/）フォルダを指す変数 **\{\{ config.repo_url }}\{\{ config.edit_uri }}** を使用して GitHub リポジトリへの直接リンクを使用してください。
 
-### Adapting the mkdocs configuration
+### mkdocs 設定の調整
 
-After adding a new use case it is enough to add the new use case to the **nav** section of [the mkdocs.yml configuration file]({{ config.repo_url}}{{ config.edit_uri }}/mkdocs.yml) under the "Use Cases" section with a title and the link:
+新しいユースケースを追加した後は、[mkdocs.yml 設定ファイル]({{ config.repo_url}}{{ config.edit_uri }}/mkdocs.yml)の **nav** セクションの「Use Cases」セクションに、タイトルとリンクを持つ新しいユースケースを追加するだけで十分です：
 
-```` markdown title="Example use-case line in mkdocs.yml"
-    - Generate a RHEL AMI image for an AWS instance using bootc-image-builder: use-cases/bootc-image-builder-ami/README.md
+```` markdown title="mkdocs.yml でのユースケース行の例"
+    - bootc-image-builder を使用して AWS インスタンス用 RHEL AMI イメージを生成: use-cases/bootc-image-builder-ami/README.md
 ````

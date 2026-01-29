@@ -1,53 +1,53 @@
-# Use Case - Building a RHEL ISO image using bootc-image-builder
+# ユースケース - bootc-image-builder を使用して RHEL ISO イメージをビルド
 
-In this example, we will build a container image from a Containerfile and we will generate a ISO image to spin up a Virtual Machine in KVM and install RHEL from the container image.
+この例では、Containerfile からコンテナイメージをビルドし、KVM で仮想マシンを起動してコンテナイメージから RHEL をインストールするための ISO イメージを生成します。
 
-The Containerfile in the example:
+この例の Containerfile では：
 
-- Updates packages
-- Installs tmux and mkpasswd to create a simple user password
-- Creates a *bootc-user* user in the image
-- Adds the wheel group to sudoers
-- Installs [Apache Server](https://httpd.apache.org/)
-- Enables the systemd unit for httpd
-- Adds a custom index.html
+- パッケージを更新
+- シンプルなユーザーパスワードを作成するために tmux と mkpasswd をインストール
+- イメージ内に *bootc-user* ユーザーを作成
+- wheel グループを sudoers に追加
+- [Apache Server](https://httpd.apache.org/) をインストール
+- httpd の systemd ユニットを有効化
+- カスタム index.html を追加
 
 <details>
-  <summary>Review Containerfile.iso</summary>
+  <summary>Containerfile.iso を確認</summary>
   ```dockerfile
   --8<-- "use-cases/bootc-image-builder-iso/Containerfile.iso"
   ```
 </details>
 
-## Building the image
+## イメージのビルド
 
-From the root folder of the repository, switch to the use case directory:
+リポジトリのルートフォルダから、ユースケースディレクトリに移動します：
 
 ```bash
 cd use-cases/bootc-image-builder-iso
 ```
 
-To build the image:
+イメージをビルドするには：
 
 ```bash
 podman build -f Containerfile.iso -t rhel-bootc-vm:iso
 ```
 
-## Testing the image
+## イメージのテスト
 
-You can now test it using:
+以下のコマンドでテストできます：
 
 ```bash
 podman run -it --rm --name rhel-bootc-vm --hostname rhel-bootc-vm -p 8080:80 rhel-bootc-vm:iso
 ```
 
-Note: The *"-p 8080:80"* part forwards the container's *http* port to the port 8080 on the host to test that it is working.
+注意: *"-p 8080:80"* の部分は、コンテナの *http* ポートをホストの 8080 ポートに転送して、動作をテストします。
 
-The container will now start and a login prompt will appear.
+コンテナが起動し、ログインプロンプトが表示されます。
 
-On another terminal tab or in your browser, you can verify that the httpd server is working and serving traffic.
+別のターミナルタブまたはブラウザで、httpd サーバーが動作してトラフィックを処理していることを確認できます。
 
-**Terminal**
+**ターミナル**
 
 ```bash
 curl localhost:8080
@@ -56,19 +56,19 @@ curl localhost:8080
 Welcome to the bootc-http instance!
 ```
 
-**Browser**
+**ブラウザ**
 
 ![](./assets/browser-test.png)
 
-Stop the httpd server from the second container using podman.
+podman を使用して httpd サーバーを停止：
 
 ```bash
 podman stop rhel-bootc-vm
 ```
 
-## Tagging and pushing the image
+## イメージのタグ付けとプッシュ
 
-To tag and push the image you can simply run (replace **YOURQUAYUSERNAME** with the account name):
+イメージをタグ付けしてプッシュするには、次のコマンドを実行します（**YOURQUAYUSERNAME** をアカウント名に置き換えてください）：
 
 
 ```bash
@@ -79,51 +79,48 @@ export QUAY_USER=YOURQUAYUSERNAME
 podman tag rhel-bootc-vm:iso quay.io/$QUAY_USER/rhel-bootc-vm:iso
 ```
 
-Log-in to Quay.io:
+Quay.io にログイン：
 
 ```bash
 podman login -u $QUAY_USER quay.io
 ```
 
-And push the image:
+そしてイメージをプッシュ：
 
 ```bash
 podman push quay.io/$QUAY_USER/rhel-bootc-vm:iso
 ```
 
-## Customize the image
+## イメージのカスタマイズ
 
-In this example, we will not create the user in the image, but we will provide a customization using the **config.toml** file. It can be used to perform customizations of users, groups, etc.
+この例では、イメージ内にユーザーを作成せず、**config.toml** ファイルを使用してカスタマイズを提供します。ユーザー、グループなどのカスタマイズを実行するために使用できます。
 
-A sample *config.toml* is already present in the use case directory, that we will use to create our VM. As this is an install ISO, we use kickstart to create the VM as well as the  **bootc-user/redhat** and add it to the **wheel** group is as follows:
+サンプルの *config.toml* がユースケースディレクトリに既に存在し、VM の作成に使用します。これはインストール ISO なので、VM を作成するために kickstart を使用し、**bootc-user/redhat** を作成して **wheel** グループに追加します：
 
 ```toml
   --8<-- "use-cases/bootc-image-builder-iso/config.toml"
 ```
 
-## Generating the ISO image
+## ISO イメージの生成
 
-To generate the ISO image we will be using [bootc-image-builder](https://github.com/osbuild/bootc-image-builder) container image that will help us transitioning from our newly generated bootable container image to a ISO file that can be used with KVM or bare metal to install the OS.
+ISO イメージを生成するには、[bootc-image-builder](https://github.com/osbuild/bootc-image-builder) コンテナイメージを使用します。これにより、新しく生成したブータブルコンテナイメージから KVM またはベアメタルで OS をインストールするために使用できる ISO ファイルへの移行が支援されます。
 
-The bootc-image-builder container will need **rootful** access to run and a local copy of the image in system storage. You can pull the image using `root` credentials from quay.io to accomplish this. If the repository isn't public, you will need to log into quay.io again. You can control visibility of the repository under `Repository Settings` in the quay.io interface.
+bootc-image-builder コンテナは **rootful** アクセスとシステムストレージ内のイメージのローカルコピーが必要です。quay.io から `root` 資格情報を使用してイメージをプルしてこれを達成できます。リポジトリがパブリックでない場合は、quay.io に再度ログインする必要があります。quay.io インターフェースの `Repository Settings` でリポジトリの可視性を制御できます。
 
 ```bash
 sudo podman login -u $QUAY_USER quay.io
 sudo podman pull quay.io/$QUAY_USER/rhel-bootc-vm:iso
 ```
 
-??? tip "Using podman image scp"
+??? tip "podman image scp の使用"
 
-    You can use `podman` to copy images between remote hosts using
-    SCP with the `image` subcommand. This will also work for local
-    storage on Linux without using SSHd. For example, to copy the
-    locally built image to system storage without pulling from the quay.io:
+    SCP で `image` サブコマンドを使用して、リモートホスト間でイメージをコピーするために `podman` を使用できます。これは SSHd を使用せずに Linux のローカルストレージでも動作します。たとえば、quay.io からプルせずにローカルでビルドしたイメージをシステムストレージにコピーするには：
 
     ```bash
     podman image scp quay.io/$QUAY_USER/rhel-bootc-vm:iso root@localhost::
     ```
 
-Once the image has been made available, proceed with the ISO image creation:
+イメージが利用可能になったら、ISO イメージの作成に進みます：
 
 ```bash
 sudo podman run \
@@ -138,9 +135,9 @@ sudo podman run \
     quay.io/$QUAY_USER/rhel-bootc-vm:iso
 ```
 
-We will use the image we built to create our ISO in the **output** folder.
+ビルドしたイメージを使用して **output** フォルダに ISO を作成します。
 
-The process will take care of all required steps (deploying the image, SELinux configuration, filesystem configuration, ostree configuration, etc.), after a couple of minutes we will find in the output:
+プロセスは必要なすべての手順（イメージのデプロイ、SELinux 設定、ファイルシステム設定、ostree 設定など）を処理し、数分後に出力に以下が表示されます：
 
 ```bash
 Generating manifest manifest-iso.json
@@ -179,7 +176,7 @@ Results saved in
 
 ```
 
-Verify that under the *output/bootiso* folder we have our image ready to be used.
+*output/bootiso* フォルダ配下に使用可能なイメージがあることを確認：
 
 ```bash
 tree output
@@ -193,9 +190,9 @@ output/
 2 directories, 2 files
 ```
 
-## Create the VM in KVM
+## KVM で VM を作成
 
-We will now use the image to spin up our Virtual Machine in KVM. Copy the ISO to a KVM storage pool on the system. We'll use a standard libvirt location, `boot` but if you have another storage pool configured you can use that as well.
+イメージを使用して KVM で仮想マシンを起動します。ISO をシステムの KVM ストレージプールにコピーします。標準的な libvirt の場所 `boot` を使用しますが、別のストレージプールが設定されている場合はそれを使用することもできます。
 
 ```bash
 sudo cp output/bootiso/install.iso /var/lib/libvirt/boot/
@@ -212,11 +209,11 @@ sudo virt-install \
     --network network=default
 ```
 
-We can check that the installer is running using the VM Console:
+VM コンソールを使用してインストーラーが実行されていることを確認できます：
 
 ![](./assets/anaconda-boot.png)
 
-You can log into the graphical console directly, or log in via SSH in another shell. Wait for the VM to be ready and retrieve the IP address for the domain to log-in using SSH using *bootc-user/redhat* credentials:
+グラフィカルコンソールに直接ログインするか、別のシェルで SSH 経由でログインできます。VM が準備完了するのを待ち、*bootc-user/redhat* の資格情報を使用して SSH でログインするためのドメインの IP アドレスを取得：
 
 ```bash
 VM_IP=$(sudo virsh -q domifaddr rhel-bootc-vm | awk '{ print $4 }' | cut -d"/" -f1) && ssh bootc-user@$VM_IP

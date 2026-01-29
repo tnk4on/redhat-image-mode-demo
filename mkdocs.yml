@@ -1,8 +1,8 @@
-site_name: Red Hat Enterprise Linux Image Mode demo
-repo_url: https://github.com/redhat-cop/redhat-image-mode-demo/
+site_name: Red Hat Enterprise Linux イメージモード デモ
+repo_url: https://github.com/tnk4on/redhat-image-mode-demo/
 edit_uri: blob/main/
-site_author: Alessandro Rossi - Red Hat
-site_description: Documentation page for the Red Hat Enterprise Linux (RHEL) Image mode demo hosted on GitHub.
+site_author: Alessandro Rossi - Red Hat (日本語翻訳版)
+site_description: GitHub でホストされている Red Hat Enterprise Linux (RHEL) イメージモード デモのドキュメントページです。
 theme:
   name: material
   favicon: assets/logo.png
@@ -18,38 +18,38 @@ theme:
       primary: custom
       toggle:
         icon: material/brightness-7
-        name: Switch to dark mode
+        name: ダークモードに切り替え
     - scheme: slate
       primary: custom
       toggle:
         icon: material/brightness-4
-        name: Switch to light mode
+        name: ライトモードに切り替え
 extra_css:
   - stylesheets/extra.css
 nav:
-  - Home: index.md
-  - Getting Started:
-    - Introducing RHEL Image mode: getting-started/introduction.md
-    - Quickstart: getting-started/quickstart.md
-    - Contributing to the project:
-        - Contribution guidelines: getting-started/contributing.md
-        - Reviewing and testing changes: getting-started/review-and-test-changes.md
-  - Use Cases:
-    - Build a simple RHEL container: use-cases/bootc-container-simple/README.md
-    - Build an Apache RHEL image: use-cases/bootc-container-httpd/README.md
-    - Use a RHEL bootc container to spin up a RHEL 9 VM with Anaconda and Kickstart: use-cases/bootc-container-anaconda-ks/README.md
-    - Update a VM based on a RHEL bootc container as a source adding packages and configuration: use-cases/bootc-container-update/README.md
-    - Upgrade a VM based on RHEL 9 bootc container to RHEL 10: use-cases/bootc-container-upgrade/README.md
-    - Apply a different RHEL container image to an existing VM: use-cases/bootc-container-replace/README.md
-    - Generate a RHEL QCOW image for a VM using bootc-image-builder: use-cases/bootc-image-builder-qcow/README.md
-    - Generate a RHEL ISO image for a VM using bootc-image-builder: use-cases/bootc-image-builder-iso/README.md
-    - Generate a RHEL AMI image for an AWS instance using bootc-image-builder: use-cases/bootc-image-builder-ami/README.md
-    - Manage RHEL Image Mode systems with Red Hat Insights: use-cases/image-mode-management-insights/README.md
-    - Ways of working with RHEL Image Mode:
-      - Introduction: use-cases/image-mode-way-of-working/README.md
-      - Configuring the demo: use-cases/image-mode-way-of-working/demo-build.md
-      - Chapter 1 - Working with Golden Images: use-cases/image-mode-way-of-working/chapter1.md
-      - Chapter 2 - Working with updates and upgrades: use-cases/image-mode-way-of-working/chapter2.md
+  - ホーム: index.md
+  - はじめに:
+    - RHEL イメージモードの紹介: getting-started/introduction.md
+    - クイックスタート: getting-started/quickstart.md
+    - プロジェクトへの貢献:
+        - 貢献ガイドライン: getting-started/contributing.md
+        - 変更のレビューとテスト: getting-started/review-and-test-changes.md
+  - ユースケース:
+    - シンプルな RHEL コンテナの構築: use-cases/bootc-container-simple/README.md
+    - Apache RHEL イメージの構築: use-cases/bootc-container-httpd/README.md
+    - RHEL bootc コンテナを使用して Anaconda と Kickstart で RHEL 9 VM を起動: use-cases/bootc-container-anaconda-ks/README.md
+    - パッケージと設定を追加して RHEL bootc コンテナベースの VM を更新: use-cases/bootc-container-update/README.md
+    - RHEL 9 bootc コンテナベースの VM を RHEL 10 にアップグレード: use-cases/bootc-container-upgrade/README.md
+    - 既存の VM に別の RHEL コンテナイメージを適用: use-cases/bootc-container-replace/README.md
+    - bootc-image-builder を使用して VM 用 RHEL QCOW イメージを生成: use-cases/bootc-image-builder-qcow/README.md
+    - bootc-image-builder を使用して VM 用 RHEL ISO イメージを生成: use-cases/bootc-image-builder-iso/README.md
+    - bootc-image-builder を使用して AWS インスタンス用 RHEL AMI イメージを生成: use-cases/bootc-image-builder-ami/README.md
+    - Red Hat Insights で RHEL イメージモードシステムを管理: use-cases/image-mode-management-insights/README.md
+    - RHEL イメージモードの活用方法:
+      - はじめに: use-cases/image-mode-way-of-working/README.md
+      - デモの設定: use-cases/image-mode-way-of-working/demo-build.md
+      - 第1章 - ゴールデンイメージの操作: use-cases/image-mode-way-of-working/chapter1.md
+      - 第2章 - アップデートとアップグレードの操作: use-cases/image-mode-way-of-working/chapter2.md
 
 markdown_extensions:
   - admonition

@@ -1,66 +1,66 @@
-# Use Case - Upgrading a VM based on a bootc image
+# ユースケース - bootc イメージベースの VM のアップグレード
 
-In this example, we want to add some bits to the [previously generated httpd image](../bootc-container-anaconda-ks/README.md) to upgrade the system from **RHEL 9.7** to **RHEL 10.1**.
+この例では、[前に生成した httpd イメージ](../bootc-container-anaconda-ks/README.md)にいくつかの機能を追加して、システムを **RHEL 9.7** から **RHEL 10.1** にアップグレードします。
 
-We will then use **bootc** to manage the system upgrade, and you will see how easy and fast perfoming upgrades is.
+次に **bootc** を使用してシステムアップグレードを管理します。アップグレードがいかに簡単で高速かがわかります。
 
-The Containerfile in this example will:
+この例の Containerfile では：
 
-- Customize the index file
-- Customizes the Message of the day
+- インデックスファイルをカスタマイズ
+- Message of the Day をカスタマイズ
 
 <details>
-  <summary>Review Containerfile.upgrade</summary>
+  <summary>Containerfile.upgrade を確認</summary>
   ```dockerfile
   --8<-- "use-cases/bootc-container-upgrade/Containerfile.upgrade"
   ```
 </details>
 
 
-## Building the image
+## イメージのビルド
 
-From the root folder of the repository, switch to the use case directory:
+リポジトリのルートフォルダから、ユースケースディレクトリに移動します：
 
 ```bash
 cd use-cases/bootc-container-upgrade
 ```
 
-You can build the image right from the Containerfile using Podman:
+Podman を使用して Containerfile から直接イメージをビルドできます：
 
 ```bash
 podman build -f Containerfile.upgrade -t rhel-bootc-vm:httpd .
 ```
 
-## Testing the image
+## イメージのテスト
 
-You can now test it using:
+以下のコマンドでテストできます：
 
 ```bash
 podman run -it --name rhel-bootc-vm --hostname rhel-bootc-vm -p 8080:80 rhel-bootc-vm:httpd
 ```
 
-Note: The *"-p 8080:80"* part forwards the container's *http* port to the port 8080 on the host to test that httpd is working.
+注意: *"-p 8080:80"* の部分は、コンテナの *http* ポートをホストの 8080 ポートに転送して、httpd が動作していることをテストします。
 
 
-The container will now start and a login prompt will appear.
+コンテナが起動し、ログインプロンプトが表示されます。
 
-### Testing Apache
+### Apache のテスト
 
-On another terminal tab or in your browser, you can verify that the httpd server is working and serving traffic.
+別のターミナルタブまたはブラウザで、httpd サーバーが動作してトラフィックを処理していることを確認できます。
 
-**Terminal**
+**ターミナル**
 
 ```bash
  ~ curl localhost:8080
 ```
 
-**Browser**
+**ブラウザ**
 
 ![](./assets/browser-test.png)
 
-## Tagging and pushing the image
+## イメージのタグ付けとプッシュ
 
-To tag and push the image you can simply run (replace **YOURQUAYUSERNAME** with the account name):
+イメージをタグ付けしてプッシュするには、次のコマンドを実行します（**YOURQUAYUSERNAME** をアカウント名に置き換えてください）：
 
 ```bash
 export QUAY_USER=YOURQUAYUSERNAME
@@ -70,26 +70,26 @@ export QUAY_USER=YOURQUAYUSERNAME
 podman tag rhel-bootc-vm:httpd quay.io/$QUAY_USER/rhel-bootc-vm:httpd
 ```
 
-Log-in to Quay.io:
+Quay.io にログイン：
 
 ```bash
 podman login -u $QUAY_USER quay.io
 ```
 
-And push the image:
+そしてイメージをプッシュ：
 
 ```bash
 podman push quay.io/$QUAY_USER/rhel-bootc-vm:httpd
 ```
 
-You can now browse to [https://quay.io/repository/YOURQUAYUSERNAME/rhel-bootc-httpd?tab=settings](https://quay.io/repository/YOURQUAYUSERNAME/rhel-bootc-httpd?tab=settings) and ensure that the repository is set to **"Public"**.
+[https://quay.io/repository/YOURQUAYUSERNAME/rhel-bootc-httpd?tab=settings](https://quay.io/repository/YOURQUAYUSERNAME/rhel-bootc-httpd?tab=settings) にアクセスして、リポジトリが **"Public"** に設定されていることを確認してください。
 
 ![](./assets/quay-repo-public.png)
 
 
-## Updating the VM with the newly created image
+## 新しく作成したイメージで VM を更新
 
-The first thing to do is logging in the VM created in the [previous use case](../bootc-container-anaconda-ks/README.md) or any other use case (QCOW, ISO, AMI):
+最初に行うことは、[前のユースケース](../bootc-container-anaconda-ks/README.md)または他のユースケース（QCOW、ISO、AMI）で作成した VM にログインすることです：
 
 ```bash
  ~ ▓▒░ ssh bootc-user@192.168.124.16
@@ -99,7 +99,7 @@ Last login: Mon Jul 29 12:03:40 2024 from 192.168.124.1
 [bootc-user@localhost ~]$
 ```
 
-Verify that bootc is installed:
+bootc がインストールされていることを確認：
 
 ```bash
 [bootc-user@localhost ~]$ bootc --help
@@ -124,10 +124,10 @@ Options:
   -h, --help   Print help (see a summary with '-h')
 ```
 
-Note that among the options we have the **upgrade** option that we will be using in this use case.
-The upgrade option allows checking, fetching and using any upgraded container image corresponding to the *imagename:tag* we used, in this case **quay.io/YOURQUAYUSERNAME/rhel-bootc-vm:httpd**
+オプションの中に **upgrade** オプションがあり、このユースケースで使用します。
+upgrade オプションは、使用した *imagename:tag*（この場合は **quay.io/YOURQUAYUSERNAME/rhel-bootc-vm:httpd**）に対応するアップグレードされたコンテナイメージをチェック、フェッチ、使用できます。
 
-The upgrade command requires higher privileges to run, let's perform the upgrade!
+upgrade コマンドにはより高い権限が必要です。アップグレードを実行しましょう！
 
 ```bash
 [bootc-user@localhost ~]$ sudo bootc upgrade
@@ -143,15 +143,15 @@ Removed layers:   78    Size: 1.5 GB
 Added layers:     71    Size: 1.5 GB
 ```
 
-As you can see, at the beginning it performs a comparison between the actual rpm-ostree image that the system is booted from and the new image, fetching **only the additional layer** corresponding to the upgrades introduced during the last build.
+ご覧のとおり、最初にシステムが起動している実際の rpm-ostree イメージと新しいイメージを比較し、最後のビルドで導入されたアップグレードに対応する**追加レイヤーのみ**をフェッチします。
 
-Proceed with a reboot:
+再起動を実行：
 
 ```bash
 [bootc-user@localhost ~]$ sudo reboot
 ```
 
-Let's log back in!
+再度ログインしましょう！
 
 ```bash
  ~ ▓▒░ ssh bootc-user@192.168.122.19
@@ -162,7 +162,7 @@ Last login: Mon Feb 24 12:15:42 2025 from 192.168.122.1
 [bootc-user@localhost ~]$
 ```
 
-You can already see that something changed, we have a new line in our message of the day, let's check the OS version:
+何かが変わったことがすでにわかります。Message of the Day に新しい行があります。OS バージョンを確認しましょう：
 
 ```bash
 [bootc-user@localhost ~]$ cat /etc/os-release
@@ -188,4 +188,4 @@ REDHAT_SUPPORT_PRODUCT="Red Hat Enterprise Linux"
 REDHAT_SUPPORT_PRODUCT_VERSION="10.1"
 ```
 
-Here we go, our image is upgraded and fully working. Of course we can use the new image to provision similar VMs that need the same pieces of software on them.
+これで、イメージがアップグレードされ完全に動作しています。もちろん、同じソフトウェアが必要な同様の VM をプロビジョニングするために新しいイメージを使用できます。

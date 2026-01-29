@@ -1,43 +1,43 @@
-# Use Case - Simple RHEL bootc container
+# ユースケース - シンプルな RHEL bootc コンテナ
 
-This example shows a very simple example of a bootc container the is built starting from a *rhel-bootc* image.
+この例では、*rhel-bootc* イメージから構築された bootc コンテナの非常にシンプルな例を示します。
 
-The Containerfile in the example:
+この例の Containerfile では：
 
-- Updates packages
-- Installs tmux and mkpasswd to create a simple user password
-- Creates a *bootc-user* user in the image
-- Adds the wheel group to sudoers
+- パッケージを更新
+- シンプルなユーザーパスワードを作成するために tmux と mkpasswd をインストール
+- イメージ内に *bootc-user* ユーザーを作成
+- wheel グループを sudoers に追加
 
 <details>
-  <summary>Review Containerfile.simple</summary>
+  <summary>Containerfile.simple を確認</summary>
   ```dockerfile
   --8<-- "use-cases/bootc-container-simple/Containerfile.simple"
   ```
 </details>
 
-## Building the image
+## イメージのビルド
 
-From the root folder of the repository, switch to the use case directory:
+リポジトリのルートフォルダから、ユースケースディレクトリに移動します：
 
 ```bash
 cd use-cases/bootc-container-simple
 ```
 
-To build the image:
+イメージをビルドするには：
 
 ```bash
 podman build -f Containerfile.simple -t rhel-bootc-simple .
 ```
 
-You can now run it using:
+以下のコマンドで実行できます：
 
 ```bash
 podman run -it --name bootc-container --hostname bootc-container -p 2022:22 rhel-bootc-simple
 ```
 
-Note: The *"-p 2022:22"* part forwards the container's SSH port to the host 2022 port.
+注意: *"-p 2022:22"* の部分は、コンテナの SSH ポートをホストの 2022 ポートに転送します。
 
-The container will now start and a login prompt will appear.
+コンテナが起動し、ログインプロンプトが表示されます。
 
-You can simply login with *bootc-user/redhat* and play around with the container content!
+*bootc-user/redhat* でログインして、コンテナの内容を確認できます！

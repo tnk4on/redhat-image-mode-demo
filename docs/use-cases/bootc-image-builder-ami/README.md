@@ -1,69 +1,69 @@
-# Use Case - Building a RHEL AWS AMI image using bootc-image-builder
+# ユースケース - bootc-image-builder を使用して RHEL AWS AMI イメージをビルド
 
-!!! warning
-    This example requires an [active AWS account](https://aws.amazon.com/). Free tier could not be enough due to the 5GB limitation on S3 storage.
+!!! warning "注意"
+    この例には[アクティブな AWS アカウント](https://aws.amazon.com/)が必要です。S3 ストレージの 5GB 制限のため、無料枠では不十分な場合があります。
 
-In this example, we will build a container image from a Containerfile and we will generate an AWS AMI to use as a base for Instances.
+この例では、Containerfile からコンテナイメージをビルドし、インスタンスのベースとして使用する AWS AMI を生成します。
 
-The Containerfile in the example:
+この例の Containerfile では：
 
-- Updates packages
-- Installs tmux and mkpasswd to create a simple user password
-- Creates a **bootc-user** user in the image
-- Adds the wheel group to sudoers
-- Installs [Apache Server](https://httpd.apache.org/)
-- Enables the systemd unit for httpd
-- Adds a custom index.html
+- パッケージを更新
+- シンプルなユーザーパスワードを作成するために tmux と mkpasswd をインストール
+- イメージ内に **bootc-user** ユーザーを作成
+- wheel グループを sudoers に追加
+- [Apache Server](https://httpd.apache.org/) をインストール
+- httpd の systemd ユニットを有効化
+- カスタム index.html を追加
 
 <details>
-  <summary>Review Containerfile.ami</summary>
+  <summary>Containerfile.ami を確認</summary>
   ```dockerfile
   --8<-- "use-cases/bootc-image-builder-ami/Containerfile.ami"
   ```
 </details>
 
-## Building the image
+## イメージのビルド
 
-From the root folder of the repository, switch to the use case directory:
+リポジトリのルートフォルダから、ユースケースディレクトリに移動します：
 
 ```bash
 cd use-cases/bootc-image-builder-ami
 ```
 
-To build the image:
+イメージをビルドするには：
 
 ```bash
 podman build -f Containerfile.ami -t rhel-bootc-vm:ami .
 ```
 
-## Testing the image
+## イメージのテスト
 
-You can now test it using:
+以下のコマンドでテストできます：
 
 ```bash
 podman run -it --name rhel-bootc-vm --hostname rhel-bootc-vm -p 8080:80 rhel-bootc-vm:ami
 ```
 
-Note: The *"-p 8080:80"* part forwards the container's *http* port to the port 8080 on the host to test that it is working.
+注意: *"-p 8080:80"* の部分は、コンテナの *http* ポートをホストの 8080 ポートに転送して、動作をテストします。
 
-The container will now start and a login prompt will appear.
+コンテナが起動し、ログインプロンプトが表示されます。
 
-On another terminal tab or in your browser, you can verify that the httpd server is working and serving traffic.
+別のターミナルタブまたはブラウザで、httpd サーバーが動作してトラフィックを処理していることを確認できます。
 
-**Terminal**
+**ターミナル**
 
 ```bash
  ~ ▓▒░ curl localhost:8080
 Welcome to the bootc-http instance!
 ```
 
-**Browser**
+**ブラウザ**
 
 ![](./assets/browser-test.png)
 
-## Tagging and pushing the image
+## イメージのタグ付けとプッシュ
 
-To tag and push the image you can simply run (replace **YOURQUAYUSERNAME** with the account name):
+イメージをタグ付けしてプッシュするには、次のコマンドを実行します（**YOURQUAYUSERNAME** をアカウント名に置き換えてください）：
 
 
 ```bash
@@ -74,49 +74,49 @@ export QUAY_USER=YOURQUAYUSERNAME
 podman tag rhel-bootc-vm:ami quay.io/$QUAY_USER/rhel-bootc-vm:ami
 ```
 
-Log-in to Quay.io:
+Quay.io にログイン：
 
 ```bash
 podman login -u $QUAY_USER quay.io
 ```
 
-And push the image:
+そしてイメージをプッシュ：
 
 ```bash
 podman push quay.io/$QUAY_USER/rhel-bootc-vm:ami
 ```
 
-You can now browse to [https://quay.io/repository/YOURQUAYUSERNAME/rhel-bootc-vm?tab=settings](https://quay.io/repository/YOURQUAYUSERNAME/rhel-bootc-vm?tab=settings) and ensure that the repository is set to **"Public"**.
+[https://quay.io/repository/YOURQUAYUSERNAME/rhel-bootc-vm?tab=settings](https://quay.io/repository/YOURQUAYUSERNAME/rhel-bootc-vm?tab=settings) にアクセスして、リポジトリが **"Public"** に設定されていることを確認してください。
 
 ![](./assets/quay-repo-public.png)
 
-## Configure required resources for AWS
+## AWS に必要なリソースを設定
 
-The AMI building process will need some configuration both on the client (for CLI configuration and credentials) and on AWS (for resources and IAM).
+AMI ビルドプロセスには、クライアント側（CLI 設定と資格情報用）と AWS 側（リソースと IAM 用）の両方で設定が必要です。
 
-The specific needs are:
+具体的に必要なものは：
 
-- an S3 bucket to temporarily store the AMI image that will be imported in the catalog
-- a policy (**vmimport**) to allow importing from S3 to the AMI catalog
-- a role to allow the **vmie** service and bind the policy
+- AMI カタログにインポートされる AMI イメージを一時的に保存する S3 バケット
+- S3 から AMI カタログへのインポートを許可するポリシー（**vmimport**）
+- **vmie** サービスを許可しポリシーをバインドするロール
 
-In [the files folder]({{ config.repo_url }}{{ config.edit_uri }}/use-cases/bootc-image-builder-ami/files/) are stored the **policy definition** and the **role definition** that you can review below before applying.
+[files フォルダ]({{ config.repo_url }}{{ config.edit_uri }}/use-cases/bootc-image-builder-ami/files/)には、適用前に確認できる**ポリシー定義**と**ロール定義**が保存されています。
 
 <details>
-  <summary>Review aws-policy.json</summary>
+  <summary>aws-policy.json を確認</summary>
   ```json
   --8<-- "use-cases/bootc-image-builder-ami/files/aws-policy.json"
   ```
 </details>
 
 <details>
-  <summary>Review aws-role.json</summary>
+  <summary>aws-role.json を確認</summary>
   ```json
   --8<-- "use-cases/bootc-image-builder-ami/files/aws-role.json"
   ```
 </details>
 
-To start the configuration use the *aws configure* command and provide the required information:
+設定を開始するには *aws configure* コマンドを使用し、必要な情報を提供します：
 
 ```bash
 [~]$ aws configure
@@ -126,38 +126,38 @@ Default region name []:
 Default output format [json]:
 ```
 
-Once this is in place, we can proceed with the resources.
+これが完了したら、リソースに進むことができます。
 
-For S3 (replace YOURREGION with the correct region, ie. eu-west-1):
+S3 用（YOURREGION を正しいリージョンに置き換えてください。例：eu-west-1）：
 
-!!! tip
-    S3 Bucket names are globally registered and unique, based on the name you find available, **edit the reference in lines 12-13 of the aws-policy.json file**
+!!! tip "ヒント"
+    S3 バケット名はグローバルに登録され一意です。利用可能な名前に基づいて、**aws-policy.json ファイルの 12-13 行目の参照を編集してください**
 
 ```bash
 [~]$ export REGION=YOURREGION
 aws s3api create-bucket --bucket rhel-bootc-demo --create-bucket-configuration LocationConstraint=$REGION
 ```
 
-Let's proceed with the role:
+ロールに進みましょう：
 
 ```bash
 aws iam create-role --role-name vmimport --assume-role-policy-document file://files/aws-role.json
 ```
 
-And then associate the policy to the role:
+そしてポリシーをロールに関連付けます：
 
 ```bash
 aws iam put-role-policy --role-name vmimport --policy-name vmimport --policy-document file://files/aws-policy.json
 ```
 
-We are now good to go!
+これで準備完了です！
 
 
-## Generating the AWS AMI image
+## AWS AMI イメージの生成
 
-To generate the AMI image we will be using [bootc-image-builder](https://github.com/osbuild/bootc-image-builder) container image that will help us transitioning from our newly generated bootable container image to an AMI image that can be used on AWS.
+AMI イメージを生成するには、[bootc-image-builder](https://github.com/osbuild/bootc-image-builder) コンテナイメージを使用します。これにより、新しく生成したブータブルコンテナイメージから AWS で使用できる AMI イメージへの移行が支援されます。
 
-Let's proceed with the QCOW image creation:
+QCOW イメージの作成に進みましょう：
 
 ```bash
 sudo podman run \
@@ -176,7 +176,7 @@ sudo podman run \
     quay.io/$QUAY_USER/rhel-bootc-vm:ami
 ```
 
-The process will take care of all required steps (deploying the image, SELinux configuration, filesystem configuration, ostree configuration, etc.), after a couple of minutes we will find in the output:
+プロセスは必要なすべての手順（イメージのデプロイ、SELinux 設定、ファイルシステム設定、ostree 設定など）を処理し、数分後に出力に以下が表示されます：
 
 ```bash
 Building manifest-ami.json
@@ -208,16 +208,16 @@ Snapshot ID: snap-068821f35b9b832af
 
 ```
 
-You can verify that the AMI is now present in the [AMIs section](https://eu-west-1.console.aws.amazon.com/ec2/home?region=eu-west-1#Images:visibility=owned-by-me) on AWS. (the URL may be different based on the region).
+AWS の [AMIs セクション](https://eu-west-1.console.aws.amazon.com/ec2/home?region=eu-west-1#Images:visibility=owned-by-me)で AMI が存在することを確認できます（URL はリージョンによって異なる場合があります）。
 
 ![](./assets/aws-ami.png)
 
 
-## Create the Instance on AWS
+## AWS でインスタンスを作成
 
-Using your preferred method, either via GUI or CLI, you can now create a fresh instance using the AMI we just imported.
+GUI または CLI のどちらの方法でも、インポートした AMI を使用して新しいインスタンスを作成できます。
 
-Wait for the Instance to be ready and retrieve the IP address to log-in using SSH using *bootc-user/redhat* credentials:
+インスタンスが準備完了するのを待ち、*bootc-user/redhat* の資格情報を使用して SSH でログインするための IP アドレスを取得：
 
 ```bash
  ~ ▓▒░

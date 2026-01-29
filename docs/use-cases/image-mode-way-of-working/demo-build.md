@@ -1,16 +1,16 @@
-## Set the environment
+## 環境の設定
 
-As in the previous use-cases you require system or systems running podman, libvirt and have access to a container registry. A web browser that can access the VMs is helpful to view the results of the web page changes.
+前のユースケースと同様に、podman、libvirt を実行し、コンテナレジストリにアクセスできるシステムが必要です。Web ページの変更結果を表示するために VM にアクセスできる Web ブラウザがあると便利です。
 
-We will be pushing to **Red Hat Quay**, but if you have your own registry, or have access to a corporate registry we highly recommend using those registries as you can then continue using these to build your own RHEL images going forward.
+**Red Hat Quay** にプッシュしますが、独自のレジストリを持っているか、企業レジストリにアクセスできる場合は、それらのレジストリを使用することを強くお勧めします。そうすることで、今後独自の RHEL イメージを構築するためにそれらを引き続き使用できます。
 
-We will be referring to `quay.io\$QUAY_USER` where `$QUAY_USER` is a variable of your Quay userid, and `$REDHAT_USER` as your Red Hat userid to pull from `registry.redhat.io`.
+`quay.io\$QUAY_USER` を参照します。ここで `$QUAY_USER` は Quay のユーザー ID の変数で、`$REDHAT_USER` は `registry.redhat.io` からプルするための Red Hat ユーザー ID です。
 
-We recommend that you set two variables in the terminal you are using for the logins to the Red Hat Registry and Quay.io, as that allows you to use the copy icon in the command line boxes.
+Red Hat Registry と Quay.io へのログイン用に、使用しているターミナルで2つの変数を設定することをお勧めします。これにより、コマンドラインボックスのコピーアイコンを使用できます。
 
-Using Quay we recommend that when you push the images to Quay that you make the repositories *public* by selecting the repository and using the Actions to set *Make Public*
-Update the variables QUAY_USER and REDHAT_USER with your Quay and Red Hat account userids. They may be the same if you use your Red Hat account.
-Replace `$QUAY_PASSWORD` and `$REDHAT_PASSWORD` with your passwords. If you decide to use these variables, we recommend you hash encrypt the passwords in the variables.
+Quay を使用する場合、イメージを Quay にプッシュする際に、リポジトリを選択して Actions を使用して *Make Public* を設定し、リポジトリを *public* にすることをお勧めします。
+QUAY_USER と REDHAT_USER 変数を Quay と Red Hat アカウントのユーザー ID で更新してください。Red Hat アカウントを使用している場合は同じかもしれません。
+`$QUAY_PASSWORD` と `$REDHAT_PASSWORD` をパスワードに置き換えてください。これらの変数を使用する場合は、変数内のパスワードをハッシュ暗号化することをお勧めします。
 
 ```bash
 QUAY_USER="your quay.io username not the email address"

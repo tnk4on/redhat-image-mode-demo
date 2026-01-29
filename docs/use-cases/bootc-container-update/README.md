@@ -1,100 +1,100 @@
-# Use Case - Updating a VM based on a bootc image
+# ユースケース - bootc イメージベースの VM の更新
 
-In this example, we want to add some bits to the [previously generated httpd image](../bootc-container-anaconda-ks/README.md) to add a [MariaDB server](https://mariadb.org/) and a text editor, [VIM](https://www.vim.org/).
+この例では、[前に生成した httpd イメージ](../bootc-container-anaconda-ks/README.md)にいくつかの機能を追加して、[MariaDB サーバー](https://mariadb.org/)とテキストエディタ [VIM](https://www.vim.org/) を追加します。
 
-We will then use **bootc** to manage the system update, and you will see how easy and fast perfoming updates is.
+次に **bootc** を使用してシステム更新を管理します。更新がいかに簡単で高速かがわかります。
 
-The Containerfile in this example will:
+この例の Containerfile では：
 
-- Installs tmux and mkpasswd to create a simple user password
-- Creates a *bootc-user* user in the image
-- Adds the wheel group to sudoers
-- Installs [Apache Server](https://httpd.apache.org/)
-- Enables the systemd unit for httpd
-- Adds a custom index.html
-- Customizes the Message of the day
+- シンプルなユーザーパスワードを作成するために tmux と mkpasswd をインストール
+- イメージ内に *bootc-user* ユーザーを作成
+- wheel グループを sudoers に追加
+- [Apache Server](https://httpd.apache.org/) をインストール
+- httpd の systemd ユニットを有効化
+- カスタム index.html を追加
+- Message of the Day をカスタマイズ
 
-But it will add the following two steps, resulting in a different image with an additional layer:
+しかし、以下の2つのステップを追加し、追加レイヤーを持つ異なるイメージになります：
 
-**- Add an additional message of the day with the update notes**
+**- 更新ノートを含む追加の Message of the Day を追加**
 
-**- Add mariadb-server package and vim**
+**- mariadb-server パッケージと vim を追加**
 
-**- Enable the mariadb systemd unit**
+**- mariadb の systemd ユニットを有効化**
 
 <details>
-  <summary>Review Containerfile.update</summary>
+  <summary>Containerfile.update を確認</summary>
   ```dockerfile
   --8<-- "use-cases/bootc-container-update/Containerfile.update"
   ```
 </details>
 
-Since the *bootc update* command will preserve the /var and /etc content, we will use a workaround to create the needed dirs for MariaDB leveraging **systemd tmpfiles**:
+*bootc update* コマンドは /var と /etc のコンテンツを保持するため、**systemd tmpfiles** を活用して MariaDB に必要なディレクトリを作成する回避策を使用します：
 
 ```bash
 --8<-- "use-cases/bootc-container-update/files/00-mariadb-tmpfile.conf"
 ```
 
-Since this is a minor update, not involving kernel modules or packages, we can leverage [soft reboot]() to apply the changes.
+これはカーネルモジュールやパッケージを含まないマイナーアップデートなので、[ソフトリブート]()を活用して変更を適用できます。
 
-## Building the image
+## イメージのビルド
 
-From the root folder of the repository, switch to the use case directory:
+リポジトリのルートフォルダから、ユースケースディレクトリに移動します：
 
 ```bash
 cd use-cases/bootc-container-update
 ```
 
-You can build the image right from the Containerfile using Podman:
+Podman を使用して Containerfile から直接イメージをビルドできます：
 
 ```bash
 podman build -f Containerfile.update -t rhel-bootc-vm:httpd .
 ```
 
-## Testing the image
+## イメージのテスト
 
-You can now test it using:
+以下のコマンドでテストできます：
 
 ```bash
 podman run -it --name rhel-bootc-vm --hostname rhel-bootc-vm -p 8080:80 -p 3306:3306 rhel-bootc-vm:httpd
 ```
 
-Note: The *"-p 8080:80" -p 3306:3306* part forwards the container's *http* and *mariadb* port to the port 8080 and 3306 on the host to test that httpd and mariadb are working.
+注意: *"-p 8080:80" -p 3306:3306* の部分は、コンテナの *http* と *mariadb* ポートをホストの 8080 と 3306 ポートに転送して、httpd と mariadb が動作していることをテストします。
 
-The container will now start and a login prompt will appear.
+コンテナが起動し、ログインプロンプトが表示されます。
 
-### Testing Apache
+### Apache のテスト
 
-On another terminal tab or in your browser, you can verify that the httpd server is working and serving traffic.
+別のターミナルタブまたはブラウザで、httpd サーバーが動作してトラフィックを処理していることを確認できます。
 
-**Terminal**
+**ターミナル**
 
 ```bash
  ~ curl localhost:8080
 ```
 
-**Browser**
+**ブラウザ**
 
 ![](./assets/browser-test.png)
 
-### Testing Mariadb
+### Mariadb のテスト
 
-From the login prompt, login as **bootc-user/redhat** and impersonate the root user:
+ログインプロンプトから、**bootc-user/redhat** でログインし、root ユーザーになります：
 
 ```bash
 [bootc-user@rhel-bootc-vm ~]$ sudo -i
 [root@rhel-bootc-vm ~]#
 ```
 
-Verify that mariadb is running:
+mariadb が実行されていることを確認：
 
 ```bash
 mysql
 ```
 
-## Tagging and pushing the image
+## イメージのタグ付けとプッシュ
 
-To tag and push the image you can simply run (replace **YOURQUAYUSERNAME** with the account name):
+イメージをタグ付けしてプッシュするには、次のコマンドを実行します（**YOURQUAYUSERNAME** をアカウント名に置き換えてください）：
 
 
 ```bash
@@ -105,26 +105,26 @@ export QUAY_USER=YOURQUAYUSERNAME
 podman tag rhel-bootc-vm:httpd quay.io/$QUAY_USER/rhel-bootc-vm:httpd
 ```
 
-Log-in to Quay.io:
+Quay.io にログイン：
 
 ```bash
 podman login -u $QUAY_USER quay.io
 ```
 
-And push the image:
+そしてイメージをプッシュ：
 
 ```bash
 podman push quay.io/$QUAY_USER/rhel-bootc-vm:httpd
 ```
 
-You can now browse to [https://quay.io/repository/YOURQUAYUSERNAME/rhel-bootc-httpd?tab=settings](https://quay.io/repository/YOURQUAYUSERNAME/rhel-bootc-httpd?tab=settings) and ensure that the repository is set to **"Public"**.
+[https://quay.io/repository/YOURQUAYUSERNAME/rhel-bootc-httpd?tab=settings](https://quay.io/repository/YOURQUAYUSERNAME/rhel-bootc-httpd?tab=settings) にアクセスして、リポジトリが **"Public"** に設定されていることを確認してください。
 
 ![](./assets/quay-repo-public.png)
 
 
-## Updating the VM with the newly created image
+## 新しく作成したイメージで VM を更新
 
-The first thing to do is logging in the VM created in the [previous use case](../bootc-container-anaconda-ks/README.md) or any other use case (QCOW, ISO, AMI):
+最初に行うことは、[前のユースケース](../bootc-container-anaconda-ks/README.md)または他のユースケース（QCOW、ISO、AMI）で作成した VM にログインすることです：
 
 ```bash
  ~ ▓▒░ ssh bootc-user@192.168.124.16
@@ -134,7 +134,7 @@ Last login: Mon Jul 29 12:03:40 2024 from 192.168.124.1
 [bootc-user@localhost ~]$
 ```
 
-Verify that bootc is installed:
+bootc がインストールされていることを確認：
 
 ```bash
 [bootc-user@localhost ~]$ bootc --help
@@ -159,10 +159,10 @@ Options:
   -h, --help   Print help (see a summary with '-h')
 ```
 
-Note that among the options we have the **update** option that we will be using in this use case.
-The update option allows checking, fetching and using any updated container image corresponding to the *imagename:tag* we used, in this case **quay.io/YOURQUAYUSERNAME/rhel-bootc-vm:httpd**
+オプションの中に **update** オプションがあり、このユースケースで使用します。
+update オプションは、使用した *imagename:tag*（この場合は **quay.io/YOURQUAYUSERNAME/rhel-bootc-vm:httpd**）に対応する更新されたコンテナイメージをチェック、フェッチ、使用できます。
 
-The update command requires higher privileges to run, let's perform the update!
+update コマンドにはより高い権限が必要です。更新を実行しましょう！
 
 ```bash
 [bootc-user@localhost ~]$ sudo bootc update --soft-reboot=required --apply
@@ -175,11 +175,11 @@ Removed layers:   1     Size: 403 bytes
 Added layers:     4     Size: 99.3 MB
 ```
 
-As you can see, at the beginning it performs a comparison between the actual rpm-ostree image that the system is booted from and the new image, fetching **only the additional layer** corresponding to the updates introduced during the last build.
+ご覧のとおり、最初にシステムが起動している実際の rpm-ostree イメージと新しいイメージを比較し、最後のビルドで導入された更新に対応する**追加レイヤーのみ**をフェッチします。
 
-As soft reboot restarts systemd services including sshd, we will be disconnected after the update is applied.
+ソフトリブートは sshd を含む systemd サービスを再起動するため、更新が適用された後に切断されます。
 
-Let's log back in!
+再度ログインしましょう！
 
 ```bash
  ~ ▓▒░ ssh bootc-user@192.168.124.16
@@ -190,7 +190,7 @@ Last login: Mon Jul 29 12:10:44 2024 from 192.168.124.1
 [bootc-user@localhost ~]$
 ```
 
-You can already see that something changed, we have a new line in our message of the day, let's see if mariadb is running and test it using the default root user that is created by default (using sudo!):
+何かが変わったことがすでにわかります。Message of the Day に新しい行があります。mariadb が実行されているか確認し、デフォルトで作成される root ユーザーを使用してテストしましょう（sudo を使用！）：
 
 ```bash
 [bootc-user@localhost ~]$ systemctl status mariadb
@@ -235,4 +235,4 @@ Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
 MariaDB [(none)]>
 ```
 
-Here we go, our image is updated and fully working. Of course we can use the new image to provision similar VMs that need the same pieces of software on them.
+これで、イメージが更新され完全に動作しています。もちろん、同じソフトウェアが必要な同様の VM をプロビジョニングするために新しいイメージを使用できます。

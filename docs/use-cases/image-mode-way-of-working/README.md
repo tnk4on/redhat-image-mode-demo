@@ -1,49 +1,49 @@
-# Ways of working with Image Mode for RHEL
+# RHEL イメージモードの活用方法
 
-In this example, we will build upon what we have learned from the previous examples. We will create a number of Image Mode container images where the images will be "inheriting" from the base images.
+この例では、これまでの例で学んだことを基に構築します。イメージが基本イメージから「継承」される複数のイメージモードコンテナイメージを作成します。
 
-We will create a Standard Operating Environment (SOE) image, also called a "golden image" that can be reused in all RHEL deployments.. The services images, running specific systemd services such as httpd or mariadb, are build on top of the base image, and the applications deployed upon the services images. We will build a web server and deploy a MariaDB serverand go through the life-cycle of upgrading the servers.
+すべての RHEL デプロイメントで再利用できる Standard Operating Environment（SOE）イメージ（「ゴールデンイメージ」とも呼ばれる）を作成します。httpd や mariadb などの特定の systemd サービスを実行するサービスイメージは基本イメージの上に構築され、アプリケーションはサービスイメージの上にデプロイされます。Web サーバーを構築し、MariaDB サーバーをデプロイして、サーバーのアップグレードのライフサイクルを経験します。
 
-There are two practices on building the systemd services images. The first is to build the services directly into the image based on the RHEL image from the `registry.redhat.io`. The second is what we will build in this example, create an base image (soe image) and reuse that image to build our services and applications.
+systemd サービスイメージを構築するには2つの方法があります。1つ目は `registry.redhat.io` からの RHEL イメージに基づいてサービスを直接イメージに構築する方法です。2つ目はこの例で構築する方法で、基本イメージ（SOE イメージ）を作成し、そのイメージを再利用してサービスとアプリケーションを構築します。
 
-## The Build process
+## ビルドプロセス
 
-The following Container files with the content will be built:
+以下の Container file とコンテンツがビルドされます：
 
 - soe-rhel
-    - Updates packages
-    - Installs tmux and mkpasswd to create a simple user password
-    - Creates a *bootc-user* user in the image
-    - Adds the wheel group to sudoers
-    - Adds a custom Message of the Day
+    - パッケージを更新
+    - シンプルなユーザーパスワードを作成するために tmux と mkpasswd をインストール
+    - イメージ内に *bootc-user* ユーザーを作成
+    - wheel グループを sudoers に追加
+    - カスタム Message of the Day を追加
 - httpd
-    - use the soe-rhel image
-    - Installs [Apache Server](https://httpd.apache.org/)
-    - Enables the systemd unit for httpd
-    - Move the www directory from var to usr
-    - Copy our simple webpage content
-    - Update the message of the day
+    - soe-rhel イメージを使用
+    - [Apache Server](https://httpd.apache.org/) をインストール
+    - httpd の systemd ユニットを有効化
+    - www ディレクトリを var から usr に移動
+    - シンプルな Web ページのコンテンツをコピー
+    - Message of the Day を更新
 - homepage
-    - use the httpd image
-    - copy our Image Mode webpage content
+    - httpd イメージを使用
+    - イメージモード Web ページのコンテンツをコピー
 - database
-    - use the soe-rhel image
-    - Installs Mariadb
-    - Copy the Mariadb config file
-    - Enables the systemd unit for Mariadb
+    - soe-rhel イメージを使用
+    - Mariadb をインストール
+    - Mariadb の設定ファイルをコピー
+    - Mariadb の systemd ユニットを有効化
 
-## The workflow
+## ワークフロー
 
-1. Create a RHEL 9.6 base image
-2. Create our application images and VMs.
-    1. Create a httpd server image based on our RHEL 9.6 base image
-    2. Create a MariaDB server image based on our RHEL 9.6 base image
-3. Deploy the application images as a virtual machine servers.
-4. Create the homepage image with our 9 homepage content and switch the VM to the homepage image.
-5. Rollback to get our old homepage back up and running.
-6. Fix the error in the homepage container file and update the VM.
-7. Upgrade the base RHEL image to RHEL 10.
-8. Build a new version of the httpd service image on RHEL 10.
-9. Build a new version of the homepage image containing the RHEL 10 homepage.
-10. Upgrade the Homepage VM to the latest 10 homepage and the OS to RHEL version 10.
-11. Upgrade the Database server to RHEL 10.
+1. RHEL 9.6 基本イメージを作成
+2. アプリケーションイメージと VM を作成
+    1. RHEL 9.6 基本イメージに基づいた httpd サーバーイメージを作成
+    2. RHEL 9.6 基本イメージに基づいた MariaDB サーバーイメージを作成
+3. アプリケーションイメージを仮想マシンサーバーとしてデプロイ
+4. 9 のホームページコンテンツを持つホームページイメージを作成し、VM をホームページイメージに切り替え
+5. ロールバックして古いホームページを復元
+6. ホームページの container file のエラーを修正して VM を更新
+7. 基本 RHEL イメージを RHEL 10 にアップグレード
+8. RHEL 10 上で新しいバージョンの httpd サービスイメージをビルド
+9. RHEL 10 ホームページを含む新しいバージョンのホームページイメージをビルド
+10. ホームページ VM を最新の 10 ホームページにアップグレードし、OS を RHEL バージョン 10 にアップグレード
+11. データベースサーバーを RHEL 10 にアップグレード

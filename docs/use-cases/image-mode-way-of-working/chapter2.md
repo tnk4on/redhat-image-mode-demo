@@ -1,18 +1,18 @@
 
-## Create a new RHEL 10 base image
+## 新しい RHEL 10 基本イメージを作成
 
-We are going to create a new soe-rhel base image that is based on the latest RHEL, version 10. This base image we are going to use to upgrade our services, httpd and mariadb. We created a new RHEL 10 homepage and then will upgrade the VMs to RHEL 10.
+最新の RHEL バージョン 10 に基づいた新しい soe-rhel 基本イメージを作成します。この基本イメージを使用して、サービス（httpd と mariadb）をアップグレードします。新しい RHEL 10 ホームページを作成し、VM を RHEL 10 にアップグレードします。
 
-1. Change to the RHEL 10 Container file directory to build the new RHEL 10 base image.
+1. RHEL 10 Container file ディレクトリに移動して新しい RHEL 10 基本イメージをビルドします。
 
     ```bash
     cd ../soe-rhel10.0
     ```
 
-2. Use Podman build to build the new RHEL 10 image and tag it as `soe-rhel:latest` and `soe-rhel:10`.
+2. Podman build を使用して新しい RHEL 10 イメージをビルドし、`soe-rhel:latest` と `soe-rhel:10` としてタグ付けします。
 
     <details>
-    <summary>Review soe-rhel10/Containerfile</summary>
+    <summary>soe-rhel10/Containerfile を確認</summary>
     ```dockerfile
     --8<-- "use-cases/image-mode-way-of-working/soe-rhel10/Containerfile"
     ```
@@ -22,30 +22,30 @@ We are going to create a new soe-rhel base image that is based on the latest RHE
     podman build -t quay.io/$QUAY_USER/soe-rhel:latest -t quay.io/$QUAY_USER/soe-rhel:10 -f Containerfile
     ```
 
-3. Push the new images to the registry.
+3. 新しいイメージをレジストリにプッシュ。
 
     ```bash
     podman push quay.io/$QUAY_USER/soe-rhel:latest && podman push quay.io/$QUAY_USER/soe-rhel:10
     ```
 
-## Upgrade the VM to RHEL 10 and update the homepage
+## VM を RHEL 10 にアップグレードしてホームページを更新
 
-Next we are going to build the httpd services image on RHEL 10 and upgrade the homepage VM.
+次に、RHEL 10 上で httpd サービスイメージをビルドし、ホームページ VM をアップグレードします。
 
 
-1. Change directory to the httpd-service directory. Since we base our httpd image on the latest tagged RHEL base image in the repository, we can reuse the same Container file.
+1. httpd-service ディレクトリに移動します。httpd イメージをリポジトリ内の最新タグ付き RHEL 基本イメージに基づいているため、同じ Container file を再利用できます。
 
     ```bash
     cd ../httpd-service
     ```
 
-2. Use Podman build to build the new httpd images and we will tag the images as `httpd:latest` and `httpd:rhel10`. It is best practice to tag these images with version numbers or date stamps, but for the demo it makes it easier to track the RHEL version we are using.
+2. Podman build を使用して新しい httpd イメージをビルドし、`httpd:latest` と `httpd:rhel10` としてタグ付けします。これらのイメージにはバージョン番号または日付スタンプでタグ付けするのがベストプラクティスですが、デモでは使用している RHEL バージョンを追跡しやすくしています。
 
-    !!! tip
-        Remeber to change the $QUAY_USER in the `Containerfile` to your repository userid.
+    !!! tip "ヒント"
+        `Containerfile` の $QUAY_USER をリポジトリのユーザー ID に変更することを忘れないでください。
     
     <details>
-    <summary>Review httpd-service/Containerfile</summary>
+    <summary>httpd-service/Containerfile を確認</summary>
     ```dockerfile
     --8<-- "use-cases/image-mode-way-of-working/httpd-service/Containerfile"
     ```
@@ -55,37 +55,37 @@ Next we are going to build the httpd services image on RHEL 10 and upgrade the h
     podman build -t quay.io/$QUAY_USER/httpd:latest -t quay.io/$QUAY_USER/httpd:rhel10 -f Containerfile
     ```
 
-3. Push the new httpd services to the registry.
+3. 新しい httpd サービスをレジストリにプッシュ。
 
     ```bash
     podman push quay.io/$QUAY_USER/httpd:latest && podman push quay.io/$QUAY_USER/httpd:rhel10
     ```
 
-4. Change to the homepage-rhel10 directory. This has an updated homepage for RHEL 10 with RHEL 10 logos.
+4. homepage-rhel10 ディレクトリに移動します。これには RHEL 10 ロゴを持つ更新されたホームページがあります。
 
     ```bash
     cd ../homepage-rhel10
     ```
 
-5. Build the new homepage images with the tags `homepage:latest` and `homepage:rhel10`. We fixed the ContainerFile in the previous section, and it will now use the httpd image and deploy correctly.
+5. `homepage:latest` と `homepage:rhel10` タグを持つ新しいホームページイメージをビルドします。前のセクションで ContainerFile を修正したので、httpd イメージを使用して正しくデプロイされます。
 
     ```bash
     podman build -t quay.io/$QUAY_USER/homepage:latest -t quay.io/$QUAY_USER/homepage:rhel10 -f Containerfile
     ```
 
-6. Push the updated homepage images to the registry.
+6. 更新されたホームページイメージをレジストリにプッシュ。
 
     ```bash
     podman push quay.io/$QUAY_USER/homepage:latest && podman push quay.io/$QUAY_USER/homepage:rhel10
     ```
 
-7. No we switch to the `homepage` VM, we will use our special ssh command to log into the VM.
+7. `homepage` VM に切り替えます。特別な ssh コマンドを使用して VM にログインします。
 
     ```bash
     VM_IP=$(sudo virsh -q domifaddr homepage | awk '{ print $4 }' | cut -d"/" -f1) && ssh bootc-user@$VM_IP
     ```
 
-8. Let's check if there is an update in the registry using the `bootc upgrade --check` command.
+8. `bootc upgrade --check` コマンドを使用して、レジストリに更新があるか確認しましょう。
 
     ```bash
     sudo bootc upgrade --check
@@ -95,18 +95,18 @@ Next we are going to build the httpd services image on RHEL 10 and upgrade the h
         Update available for: docker://quay.io/$QUAY_USER/homepage:latest \
         Version: 10.1 \
         Digest: sha256:0c5416...... \
-        Total new layers: 77    Size: 885.4 MB \
-        Removed layers:   76    Size: 1.4 GB \
-        Added layers:     76    Size: 885.4 MB
+        Total new layers: 77    Size: 885.4 MB \
+        Removed layers:   76    Size: 1.4 GB \
+        Added layers:     76    Size: 885.4 MB
     ```
 
-9. Apply the upgrage to our VM. This may take a while as we are pulling RHEL 10 and the homepage updates in one go.
+9. VM にアップグレードを適用します。RHEL 10 とホームページの更新を一度にプルしているため、時間がかかる場合があります。
 
     ```bash
     sudo bootc upgrade
     ```
 
-10. Use `bootc status` to check that we have an update and that is shows that the update RHEL version is version 10.
+10. `bootc status` を使用して、更新があり、更新された RHEL バージョンがバージョン 10 であることを確認します。
 
     ```bash
     sudo bootc status
@@ -126,57 +126,57 @@ Next we are going to build the httpd services image on RHEL 10 and upgrade the h
                 Version: 9.6 (2025-07-21 16:04:36.100285429 UTC)
     ```
 
-11. Reboot the VM to change to the new homepage and run RHEL 10!
+11. VM を再起動して新しいホームページに変更し、RHEL 10 を実行します！
 
     ```bash
     sudo reboot
     ```
 
-12. We use our special ssh command again to log into the VM.
+12. 再び特別な ssh コマンドを使用して VM にログインします。
 
     ```bash
     VM_IP=$(sudo virsh -q domifaddr homepage | awk '{ print $4 }' | cut -d"/" -f1) && ssh bootc-user@$VM_IP
     ```
 
-13. and check the OS version using `bootc status`
+13. `bootc status` を使用して OS バージョンを確認
 
     ```bash
     sudo bootc status
     ```
 
-14. Finally use the VMs ip address and go to the web site to confirm the web page upgrade showing RHEL 10 logos.
+14. 最後に、VM の IP アドレスを使用して Web サイトにアクセスし、RHEL 10 ロゴを表示する Web ページのアップグレードを確認します。
 
-This is to show how we update the base OS on an existing deployment. Usually this will be done during an application, or in this case, a homepage update.
+これは、既存のデプロイメントで基本 OS を更新する方法を示しています。通常、これはアプリケーション（この場合はホームページ）の更新中に行われます。
 
-## Upgrade the database server to RHEL 10
+## データベースサーバーを RHEL 10 にアップグレード
 
-Similar we are going to build the database services image on RHEL 10 and upgrade the database VM. Since we don't have any application tied to the database we can upgrade our database VM directly from the database services image.
+同様に、RHEL 10 上でデータベースサービスイメージをビルドし、データベース VM をアップグレードします。データベースに紐づいたアプリケーションがないため、データベースサービスイメージから直接データベース VM をアップグレードできます。
 
-1. Change directory to the mariadb-service directory. Since we base our database service image on the latest tagged RHEL base image in the repository, we can reuse the same Container file.
+1. mariadb-service ディレクトリに移動します。データベースサービスイメージをリポジトリ内の最新タグ付き RHEL 基本イメージに基づいているため、同じ Container file を再利用できます。
 
     ```bash
     cd ../mariadb-service
     ```
 
-2. Use Podman build to build the new httpd images and we will tag the images as `database:latest` and `database:rhel10`. It is best practice to tag these images with version numbers or date stamps, but for the demo it makes it easier to track the RHEL version we are using.
+2. Podman build を使用して新しい httpd イメージをビルドし、`database:latest` と `database:rhel10` としてタグ付けします。これらのイメージにはバージョン番号または日付スタンプでタグ付けするのがベストプラクティスですが、デモでは使用している RHEL バージョンを追跡しやすくしています。
 
     ```bash
     podman build -t quay.io/$QUAY_USER/database:latest -t quay.io/$QUAY_USER/database:rhel10 -f Containerfile
     ```
 
-3. Push the new httpd services to the registry.
+3. 新しい httpd サービスをレジストリにプッシュ。
 
     ```bash
     podman push quay.io/$QUAY_USER/database:latest && podman push quay.io/$QUAY_USER/database:rhel10
     ```
 
-4. No we switch to the database VM, we will use our special ssh command to log into the VM.
+4. データベース VM に切り替えます。特別な ssh コマンドを使用して VM にログインします。
 
     ```bash
     VM_IP=$(sudo virsh -q domifaddr database | awk '{ print $4 }' | cut -d"/" -f1) && ssh bootc-user@$VM_IP
     ```
 
-5. Let's check if there is an update in the registry using the `bootc upgrade --check` command.
+5. `bootc upgrade --check` コマンドを使用して、レジストリに更新があるか確認しましょう。
 
     ```bash
     sudo bootc upgrade --check
@@ -186,24 +186,24 @@ Similar we are going to build the database services image on RHEL 10 and upgrade
         Update available for: docker://quay.io/$QUAY_USER/database:latest \
         Version: 10.1 \
         Digest: sha256:0c5416...... \
-        Total new layers: 77    Size: 885.4 MB \
-        Removed layers:   76    Size: 1.4 GB \
-        Added layers:     76    Size: 885.4 MB
+        Total new layers: 77    Size: 885.4 MB \
+        Removed layers:   76    Size: 1.4 GB \
+        Added layers:     76    Size: 885.4 MB
     ```
 
-6. Apply the upgrage to our VM. This may take a while as we are pulling RHEL 10 and the homepage updates in one go. Using  `--apply` the VM will be rebooted after the upgrade is done.
+6. VM にアップグレードを適用します。RHEL 10 とホームページの更新を一度にプルしているため、時間がかかる場合があります。`--apply` を使用すると、アップグレード完了後に VM が再起動されます。
 
     ```bash
     sudo bootc upgrade --apply
     ```
 
-7. Use our special ssh command to log into the VM again.
+7. 特別な ssh コマンドを使用して再び VM にログインします。
 
     ```bash
     VM_IP=$(sudo virsh -q domifaddr database | awk '{ print $4 }' | cut -d"/" -f1) && ssh bootc-user@$VM_IP
     ```
 
-8. Use `bootc status` to check that we have an update and that is shows that the update RHEL version is version 10.
+8. `bootc status` を使用して、更新があり、更新された RHEL バージョンがバージョン 10 であることを確認します。
 
     ```bash
     sudo bootc status
@@ -223,35 +223,35 @@ Similar we are going to build the database services image on RHEL 10 and upgrade
                 Version: 9.6 (2025-07-21 16:04:36.100285429 UTC)
     ```
 
-9. Finally check that mariadb is running.
+9. 最後に mariadb が実行されていることを確認します。
 
     ```bash
     sudo systemctl status mariadb
     ```
 
-10. We can also check the Linux OS version.
+10. Linux OS バージョンも確認できます。
 
     ```bash
     cat /etc/redhat-release
     ```
 
-## Use RHEL's soft-reboot feature to deploy an update to the homepage
+## RHEL のソフトリブート機能を使用してホームページに更新をデプロイ
 
-In the last steps we are going to push a new RHEL 10 webpage to the homapage server and make use of the RHEL 10 soft-reboot feature to deploy the new layers.
+最後のステップでは、新しい RHEL 10 Web ページをホームページサーバーにプッシュし、RHEL 10 のソフトリブート機能を使用して新しいレイヤーをデプロイします。
 
-1. Change to the homepage-rhel10update directory. This has a new homepage for RHEL 10 with more images.
+1. homepage-rhel10update ディレクトリに移動します。これにはより多くの画像を持つ新しい RHEL 10 用ホームページがあります。
 
     ```bash
     cd ../homepage-rhel10update
     ```
 
-2. Build the new homepage images with the tags `homepage:latest` and `homepage:rhel10update`.
+2. `homepage:latest` と `homepage:rhel10update` タグを持つ新しいホームページイメージをビルドします。
 
-    !!! tip
-        Remeber to change the $QUAY_USER in the `Containerfile` to your repository userid.
+    !!! tip "ヒント"
+        `Containerfile` の $QUAY_USER をリポジトリのユーザー ID に変更することを忘れないでください。
 
     <details>
-    <summary>Review homepage-rhel10update/Containerfile</summary>
+    <summary>homepage-rhel10update/Containerfile を確認</summary>
     ```dockerfile
     --8<-- "use-cases/image-mode-way-of-working/homepage-rhel10update/Containerfile"
     ```
@@ -261,19 +261,19 @@ In the last steps we are going to push a new RHEL 10 webpage to the homapage ser
     podman build -t quay.io/$QUAY_USER/homepage:latest -t quay.io/$QUAY_USER/homepage:rhel10update -f Containerfile
     ```
 
-3. Push the updated homepage images to the registry.
+3. 更新されたホームページイメージをレジストリにプッシュ。
 
     ```bash
     podman push quay.io/$QUAY_USER/homepage:latest && podman push quay.io/$QUAY_USER/homepage:rhel10update
     ```
 
-4. No we switch to the `homepage` VM, we will use our special ssh command to log into the VM.
+4. `homepage` VM に切り替えます。特別な ssh コマンドを使用して VM にログインします。
 
     ```bash
     VM_IP=$(sudo virsh -q domifaddr homepage | awk '{ print $4 }' | cut -d"/" -f1) && ssh bootc-user@$VM_IP
     ```
 
-5. Let's check if there is an update in the registry using the `bootc upgrade --check` command.
+5. `bootc upgrade --check` コマンドを使用して、レジストリに更新があるか確認しましょう。
 
     ```bash
     sudo bootc upgrade --check
@@ -283,39 +283,39 @@ In the last steps we are going to push a new RHEL 10 webpage to the homapage ser
         Update available for: docker://quay.io/$QUAY_USER/homepage:latest \
         Version: 10.1 \
         Digest: sha256:0c5416...... \
-        Total new layers: 77    Size: 885.4 MB \
-        Removed layers:   76    Size: 1.4 GB \
-        Added layers:     76    Size: 885.4 MB
+        Total new layers: 77    Size: 885.4 MB \
+        Removed layers:   76    Size: 1.4 GB \
+        Added layers:     76    Size: 885.4 MB
     ```
 
-6. Since we want to check that only systemd is rebooted and not the VM we will check the time the VM has been running
+6. systemd のみが再起動され、VM が再起動されないことを確認するために、VM が実行されている時間を確認します。
 
     ```bash
     uptime
     ```
 
-7. Apply the upgrage to our VM. This should be quick as we are only pulling a few layers. The VM will let us know it is rebooting and as the sshd service will also re-initialise we will be logged out.
+7. VM にアップグレードを適用します。いくつかのレイヤーのみをプルしているため、これは素早く完了するはずです。VM は再起動を通知し、sshd サービスも再初期化されるため、ログアウトされます。
 
     ```bash
     sudo bootc upgrade --soft-reboot=required --apply
     ```
 
-8. We use our special ssh command again to log into the VM.
+8. 再び特別な ssh コマンドを使用して VM にログインします。
 
     ```bash
     VM_IP=$(sudo virsh -q domifaddr homepage | awk '{ print $4 }' | cut -d"/" -f1) && ssh bootc-user@$VM_IP
     ```
 
-9. and check the OS version using `bootc status`
+9. `bootc status` を使用して OS バージョンを確認
 
     ```bash
     sudo bootc status
     ```
 
-10. Finally, use the VMs ip address and go to the web site to confirm the web page upgrade showing the brand new RHEL 10 web page with the additional images.
+10. 最後に、VM の IP アドレスを使用して Web サイトにアクセスし、追加の画像を持つ新しい RHEL 10 Web ページを表示する Web ページのアップグレードを確認します。
 
-This is to show how we update the application only with minimal downtime.
+これは、最小限のダウンタイムでアプリケーションのみを更新する方法を示しています。
 
-## Conclusion
+## まとめ
 
-This concludes the workshop exercises. We encourage you to try different services and applications based on the base image `soe-rhel` that we used in these exercise. We also encourage you to build your own base or corporate image and build and deploy servers using it. You can use Podman Desktop for many of the executions that we did in the command line, and using a desktop approach may be easier for you. Finally, we didn't incorporate any pipelines or CI/CD flows in these examples and using these tools to test and deploy updates makes the task of a system administrator a lot easier. Our Youtube channel "Into the Terminal" episode 151 has a great introduction to this.
+これでワークショップの演習は終了です。これらの演習で使用した基本イメージ `soe-rhel` に基づいて、さまざまなサービスやアプリケーションを試すことをお勧めします。また、独自の基本イメージまたは企業イメージを構築し、それを使用してサーバーを構築およびデプロイすることもお勧めします。コマンドラインで行った多くの実行には Podman Desktop を使用でき、デスクトップアプローチの方が使いやすいかもしれません。最後に、これらの例にはパイプラインや CI/CD フローを組み込んでいませんが、これらのツールを使用して更新をテストおよびデプロイすると、システム管理者のタスクがはるかに楽になります。YouTube チャンネル「Into the Terminal」のエピソード 151 には、これに関する素晴らしい紹介があります。
